@@ -14,7 +14,7 @@ void quizzes::Draw_Quizlist()
     }
         
     for(const auto &quiz : quizList)
-    {
+    {   
         if(ImGui::Selectable(quiz.data(), selected_quiz == quiz.data()))
         {
             selected_quiz = quiz.data();
@@ -72,12 +72,9 @@ void quizzes::load_quiz_list_from_file(std::string_view fileName)
     }
 }
 
-void quizzes::addQuiz()
+quizzes::quizzes()
 {
-}
 
-quizzes::quizzes(/* args */)
-{
 }
 
 quizzes::~quizzes()

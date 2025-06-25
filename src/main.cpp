@@ -99,7 +99,7 @@ int main(int, char **)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGui::StyleColorsDark();
+    ImGui::StyleColorsLight();
     ImPlot::CreateContext();
 
     // Setup Platform/Renderer backends
@@ -107,6 +107,13 @@ int main(int, char **)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     auto &style = ImGui::GetStyle();
+    /*
+    style.WindowPadding = ImVec2(0, 0);        // pencere içi kenar boşluğu
+    style.FramePadding  = ImVec2(2, 2);        // buton ve input içi boşluk
+    style.ItemSpacing   = ImVec2(4, 4);        // iki öğe arası boşluk
+    style.ItemInnerSpacing = ImVec2(2, 2);     // aynı grup içindeki öğeler arası boşluk
+    */
+
     style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(1.0, 1.0, 1.0, 1.0);
     style.Colors[ImGuiCol_TableBorderLight] = ImVec4(1.0, 1.0, 1.0, 1.0);
 
@@ -123,6 +130,7 @@ int main(int, char **)
         glfwGetFramebufferSize(window, &display_w, &display_h);
 
         render(window_obj, display_w, display_h);
+
         ImGui::Render();
 
         end_cycle(window);

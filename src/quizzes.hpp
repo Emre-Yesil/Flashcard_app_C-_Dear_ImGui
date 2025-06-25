@@ -9,7 +9,8 @@
 class quizzes
 {
 private:
-    
+
+
 public:
 
     typedef struct quiz
@@ -26,7 +27,10 @@ public:
 
     std::string selected_quiz;
 
-    void addQuiz();
+    bool addQuizPopupOpen = false;
+
+    //constexpr static auto popup_padding = 30.0F;
+
 
     void Draw_Quizlist();
 
