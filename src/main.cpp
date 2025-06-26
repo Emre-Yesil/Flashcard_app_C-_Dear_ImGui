@@ -119,7 +119,7 @@ int main(int, char **)
 
     WindowClass window_obj;
     
-    window_obj.loadFont();
+    window_obj.InitFont();
 
     while (!glfwWindowShouldClose(window))
     {

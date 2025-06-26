@@ -18,9 +18,18 @@ protected:
 
 public:
 
-    constexpr static auto popup_padding = 30.0F;
+    constexpr static auto popup_padding = 20.0F;
 
     enum class fontSize { Small, Medium, Large, Giant };
+
+    ImFont *smallFont = nullptr;
+    ImFont *mediumFont = nullptr;
+    ImFont *bigFont = nullptr;
+    ImFont *giantFont = nullptr;
+
+    bool addQuizPopupOpen = false;
+
+    char nameLog[32] = "";
 
     enum themes{
         dark = 0,
@@ -39,7 +48,11 @@ public:
 
     void addQuiz(float width, float height);
 
-    void loadFont();
+    void drawAddQuizTable(float width, float height);
+
+    void InitFont();
+
+    ImFont *getFont(enum class fontSize e);
 }; 
 
 void render(WindowClass &window_obj, int width, int height);

@@ -25,12 +25,9 @@ public:
 
     std::vector<std::string> quizList;
 
+    std::map<std::string, struct quiz>Quizzes;
+
     std::string selected_quiz;
-
-    bool addQuizPopupOpen = false;
-
-    //constexpr static auto popup_padding = 30.0F;
-
 
     void Draw_Quizlist();
 

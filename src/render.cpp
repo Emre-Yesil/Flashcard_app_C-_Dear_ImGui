@@ -6,6 +6,7 @@
 #include <fstream>
 #include <shlobj.h>
 #include <string>
+#include <algorithm>
 
 #include "render.hpp"
 
@@ -25,6 +26,8 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
 
     const auto window_size = ImVec2(width, height);
     const auto window_pos = ImVec2(0.0F, 0.0F);
+
+    ImGui::PushFont(getFont(fontSize::Medium));
 
     ImGui::SetNextWindowSize(window_size);
     ImGui::SetNextWindowPos(window_pos);
@@ -52,12 +55,17 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
 
     ImGui::End();
 
-    if(quiz_obj.addQuizPopupOpen)
+    if(addQuizPopupOpen)
     {
         ImGui::OpenPopup("##addQuiz");
-        quiz_obj.addQuizPopupOpen = false;
+        //addQuizPopupOpen = false;
     }
-    addQuiz(width, height);
+    if(addQuizPopupOpen)
+    {
+        addQuiz(width, height);
+    }
+    ImGui::PopFont();
+        
 }
 
 
@@ -69,7 +77,7 @@ void WindowClass::Draw_top_bar()
         {
             if(ImGui::MenuItem("New Quiz"))
             { 
-                quiz_obj.addQuizPopupOpen = true;
+                addQuizPopupOpen = true;
             }
             if(ImGui::MenuItem("Save all"))
             { 
@@ -94,7 +102,6 @@ void WindowClass::addQuiz(float width, float height)
     ImGui::SetNextWindowSize(ImVec2(width - (2 * popup_padding), height - (2 * popup_padding)));
     if(ImGui::BeginPopupModal("##addQuiz", nullptr, popup_flags))
     {
-        char nameLog[64] = "";
         //use it ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.5f, 1.0f));
 
         ImGui::Columns(2, "col", false);
@@ -105,6 +112,24 @@ void WindowClass::addQuiz(float width, float height)
         ImGui::BeginChild("##setting_menu", ImVec2((width/4) - (2 * popup_padding), height - (4 * popup_padding)), childFlags);
             //...
             //...
+        if(ImGui::Button("Save") && strlen(nameLog) > 0 && 
+            std::find(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), std::string(nameLog)) == quiz_obj.quizList.end())
+        {
+            std::string str = std::string(nameLog);
+            quiz_obj.quizList.push_back(str);
+            //quiz_obj.Quizzes[str] = {str, /*vector that store flascards*/};
+            memset(nameLog, 0, sizeof(nameLog));
+            addQuizPopupOpen = false;
+        }
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Cancel"))
+        {
+            memset(nameLog, 0, sizeof(nameLog));
+            addQuizPopupOpen = false;
+        }
+
         ImGui::EndChild();
 
         ImGui::NextColumn();
@@ -113,12 +138,16 @@ void WindowClass::addQuiz(float width, float height)
         ImGui::SetNextWindowPos(ImVec2((width/4) + popup_padding, 2* popup_padding));
         ImGui::BeginChild("##nameing_menu", 
             ImVec2((3 * (width/4)) - (3 * popup_padding), (height/4) - (4 * popup_padding)), childFlags);
+        
+        ImGui::SetNextItemWidth(3*(width/4) - 3* popup_padding);
+        ImGui::PushFont(getFont(fontSize::Giant));
 
-        ImGui::InputText("##naming_input", nameLog, sizeof(nameLog), ImGuiInputTextFlags_NoHorizontalScroll);
-            
+        ImGui::InputText("##naming_input", nameLog, sizeof(nameLog), 
+            ImGuiInputTextFlags_NoHorizontalScroll | ImGuiInputTextFlags_None);
+
+        ImGui::PopFont();
             //...
             //...
-            
         ImGui::EndChild();
 
         //add Flashcard child
@@ -133,7 +162,15 @@ void WindowClass::addQuiz(float width, float height)
     }
 }
 
-void WindowClass::loadFont(){
+void WindowClass::drawAddQuizTable(float width, float height)
+{
+    
+
+
+}
+
+
+void WindowClass::InitFont(){
     ImGuiIO& io = ImGui::GetIO();
 
     // Get Windows font directory
@@ -142,8 +179,24 @@ void WindowClass::loadFont(){
     strcat_s(fontPath, "\\arial.ttf");  // Use Arial as the default font
 
     // Load the fonts
-    static ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath, 18.0F);
-} 
+    smallFont = io.Fonts->AddFontFromFileTTF(fontPath, 12.0F);
+    mediumFont = io.Fonts->AddFontFromFileTTF(fontPath, 24.0F);
+    bigFont = io.Fonts->AddFontFromFileTTF(fontPath, 48.0F);
+    giantFont = io.Fonts->AddFontFromFileTTF(fontPath, 58.0F);
+}
+
+ImFont * WindowClass::getFont(enum class fontSize e)
+{
+    switch (e)
+    {
+    case fontSize::Small : return smallFont; break;
+    case fontSize::Medium : return mediumFont; break;
+    case fontSize::Large : return bigFont; break;
+    case fontSize::Giant : return giantFont; break;
+    
+    default: return mediumFont; break;
+    }
+}
 
 
 void render(WindowClass &window_obj, int width, int height)
