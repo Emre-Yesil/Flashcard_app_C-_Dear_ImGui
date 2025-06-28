@@ -19,6 +19,7 @@ protected:
 public:
 
     constexpr static auto popup_padding = 20.0F;
+    constexpr static auto main_padding = 20.0F;
 
     enum class fontSize { Small, Medium, Large, Giant };
 

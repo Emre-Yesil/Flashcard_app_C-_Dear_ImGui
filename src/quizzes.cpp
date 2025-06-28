@@ -21,9 +21,17 @@ void quizzes::Draw_Quizlist()
         }
     }
 }
+void quizzes::save_quiz_to_file(std::string quizName)
+{
+
+}
+void quizzes::load_quiz_from_file(std::string quizName)
+{
+
+}
 
 //not tested
-void quizzes::save_quiz_list_from_file(std::string_view fileName)
+void quizzes::save_quiz_list_to_file(std::string_view fileName)
 {
     std::ofstream out(fileName.data(), std::ios::binary);
 

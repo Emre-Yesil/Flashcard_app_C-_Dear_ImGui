@@ -14,6 +14,29 @@
 /*
     main interface düzelt
 
+    -quizzes_class-
+        |--"save to file"(NOT STARTED)
+        |--"load to file"(NOT STARTED)
+        |--"save and load list"(DONE)
+
+    -Featres-
+        |--"changing font size"(DONE)
+        |--"change theme"(NOT STARTED)
+
+    -draw()-
+        |--topBar(ADD FEATURES)
+        |   |--addQuiz(NOT DONE)
+        |       |--drawAddTable
+        |       |--save_to_file(NOT DONE)
+        |
+        |--QuizMenu(NOT DONE)
+        |   |--drawQuizList(DONE)
+        |   |--"right clict to play or edit inside"
+        |
+        |--PlayMenu(NOT STARTED)
+        |
+        |--
+
     dark mode
 */
 
@@ -39,7 +62,7 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     Draw_top_bar();
     
     //quizMenu begin
-    ImGui::BeginChild("quizMenu", ImVec2(width/4, height-40.0F), childFlags);
+    ImGui::BeginChild("quizMenu", ImVec2(width/4, height - 40.0F), childFlags);
 
     quiz_obj.Draw_Quizlist();
         
@@ -118,9 +141,17 @@ void WindowClass::addQuiz(float width, float height)
         {
             std::string str = std::string(nameLog);
             quiz_obj.quizList.push_back(str);
-            std::vector<std::string>tmp; 
-            //quiz_obj.Quizzes[str] = {str, {str, std::vector<flascard::card>flashcards}};
+
+            for(size_t i = 0; i < front.size(); i++)
+            {
+                quiz_obj.Quizzes[str].flashcards.push_back(flashcard::card{std::string(front[i].data()), std::string(back[i].data())});
+            }
+            quiz_obj.save_quiz_to_file(str);
             memset(nameLog, 0, sizeof(nameLog));
+            front.clear();
+            front.resize(1);
+            back.clear();
+            back.resize(1);
             addQuizPopupOpen = false;
         }
 
@@ -129,6 +160,10 @@ void WindowClass::addQuiz(float width, float height)
         if(ImGui::Button("Cancel"))
         {
             memset(nameLog, 0, sizeof(nameLog));
+            front.clear();
+            front.resize(1);
+            back.clear();
+            back.resize(1);
             addQuizPopupOpen = false;
         }
 
@@ -156,8 +191,8 @@ void WindowClass::addQuiz(float width, float height)
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
         
         drawAddQuizTable(width, height, front, back);
-        ImGui::EndChild();
 
+        ImGui::EndChild();
         ImGui::EndPopup();
     }
 }
@@ -165,7 +200,7 @@ void WindowClass::addQuiz(float width, float height)
 void WindowClass::drawAddQuizTable(float width, float height, 
             std::vector<std::array<char, 32>>& front, std::vector<std::array<char, 32>>& back)
 {
-    constexpr static auto table_flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
+    constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
 
     //static std::vector<std::array<char, 32>> front(1);
     //static std::vector<std::array<char, 32>> back(1);
