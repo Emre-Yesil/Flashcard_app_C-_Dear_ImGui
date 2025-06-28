@@ -48,8 +48,10 @@ public:
 
     void addQuiz(float width, float height);
 
-    void drawAddQuizTable(float width, float height);
-
+    
+    void drawAddQuizTable(float width, float height); // used is addQuiz
+    size_t inputCount = 0;
+    
     void InitFont();
 
     ImFont *getFont(enum class fontSize e);

@@ -7,6 +7,7 @@
 #include <shlobj.h>
 #include <string>
 #include <algorithm>
+#include <array>
 
 #include "render.hpp"
 
@@ -67,7 +68,6 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     ImGui::PopFont();
         
 }
-
 
 void WindowClass::Draw_top_bar()
 {
@@ -144,18 +144,16 @@ void WindowClass::addQuiz(float width, float height)
 
         ImGui::InputText("##naming_input", nameLog, sizeof(nameLog), 
             ImGuiInputTextFlags_NoHorizontalScroll | ImGuiInputTextFlags_None);
-
         ImGui::PopFont();
-            //...
-            //...
+    
         ImGui::EndChild();
 
         //add Flashcard child
         ImGui::SetNextWindowPos(ImVec2((width/4) + popup_padding, (height/4) - popup_padding));
         ImGui::BeginChild("##addFlashcard_menu", 
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
-            //...
-            //...
+        
+        drawAddQuizTable(width, height);
         ImGui::EndChild();
 
         ImGui::EndPopup();
@@ -164,9 +162,42 @@ void WindowClass::addQuiz(float width, float height)
 
 void WindowClass::drawAddQuizTable(float width, float height)
 {
+    constexpr static auto table_flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
+
+    bool isEmptyFront = false;
+    bool isEmptyBack = false;
+
+    static std::vector<std::array<char, 32>> front(1);
+    static std::vector<std::array<char, 32>> back(1);
+
+    inputCount = front.size();
     
+    if(ImGui::BeginTable("##addtable",2, table_flags , ImVec2(width ,height)));
+        {   
+            ImGui::TableSetupColumn("Front Side");
+            ImGui::TableSetupColumn("Back Side");
+            ImGui::TableHeadersRow();
 
+            for(size_t i = 0; i < inputCount; i++)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::InputText(("##frontSide"+ std::to_string(i)).c_str(), front[i].data(), front[i].size());
+                ImGui::TableSetColumnIndex(1);
+                ImGui::InputText(("##backSide" + std::to_string(i)).c_str(), back[i].data(), back[i].size());
+            }
+        
+                const auto& lastFront = front.back();
+                const auto& lastBack = back.back();
 
+                if (strlen(lastFront.data()) > 0 && strlen(lastBack.data()) > 0)
+                {
+                    front.emplace_back(); // adds zero-initialized char[64]
+                    back.emplace_back();
+                }
+                
+            ImGui::EndTable();
+        }
 }
 
 
