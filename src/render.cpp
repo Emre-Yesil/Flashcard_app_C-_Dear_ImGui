@@ -97,6 +97,8 @@ void WindowClass::addQuiz(float width, float height)
 
     constexpr static auto childFlags = ImGuiChildFlags_Borders | ImGuiChildFlags_AlwaysUseWindowPadding;
 
+    static std::vector<std::array<char, 32>> front(1);
+    static std::vector<std::array<char, 32>> back(1);
 
     ImGui::SetNextWindowPos(ImVec2(popup_padding, popup_padding));
     ImGui::SetNextWindowSize(ImVec2(width - (2 * popup_padding), height - (2 * popup_padding)));
@@ -110,14 +112,14 @@ void WindowClass::addQuiz(float width, float height)
         //setting child
         ImGui::SetNextWindowPos(ImVec2(2* popup_padding, 2* popup_padding));
         ImGui::BeginChild("##setting_menu", ImVec2((width/4) - (2 * popup_padding), height - (4 * popup_padding)), childFlags);
-            //...
-            //...
+            
         if(ImGui::Button("Save") && strlen(nameLog) > 0 && 
             std::find(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), std::string(nameLog)) == quiz_obj.quizList.end())
         {
             std::string str = std::string(nameLog);
             quiz_obj.quizList.push_back(str);
-            //quiz_obj.Quizzes[str] = {str, /*vector that store flascards*/};
+            std::vector<std::string>tmp; 
+            //quiz_obj.Quizzes[str] = {str, {str, std::vector<flascard::card>flashcards}};
             memset(nameLog, 0, sizeof(nameLog));
             addQuizPopupOpen = false;
         }
@@ -153,26 +155,24 @@ void WindowClass::addQuiz(float width, float height)
         ImGui::BeginChild("##addFlashcard_menu", 
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
         
-        drawAddQuizTable(width, height);
+        drawAddQuizTable(width, height, front, back);
         ImGui::EndChild();
 
         ImGui::EndPopup();
     }
 }
 
-void WindowClass::drawAddQuizTable(float width, float height)
+void WindowClass::drawAddQuizTable(float width, float height, 
+            std::vector<std::array<char, 32>>& front, std::vector<std::array<char, 32>>& back)
 {
     constexpr static auto table_flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
 
-    bool isEmptyFront = false;
-    bool isEmptyBack = false;
-
-    static std::vector<std::array<char, 32>> front(1);
-    static std::vector<std::array<char, 32>> back(1);
-
+    //static std::vector<std::array<char, 32>> front(1);
+    //static std::vector<std::array<char, 32>> back(1);
+    
     inputCount = front.size();
     
-    if(ImGui::BeginTable("##addtable",2, table_flags , ImVec2(width ,height)));
+    if(ImGui::BeginTable("##addtable",2, table_flags , ImVec2(width ,height)))
         {   
             ImGui::TableSetupColumn("Front Side");
             ImGui::TableSetupColumn("Back Side");

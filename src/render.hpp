@@ -48,10 +48,14 @@ public:
 
     void addQuiz(float width, float height);
 
-    
-    void drawAddQuizTable(float width, float height); // used is addQuiz
+    void saveQuiz();
+
+    void editQuiz(float width, float height);
+
+    void drawAddQuizTable(float width, float height, 
+            std::vector<std::array<char, 32>>& front, std::vector<std::array<char, 32>>& back); // used is addQuiz
     size_t inputCount = 0;
-    
+
     void InitFont();
 
     ImFont *getFont(enum class fontSize e);
