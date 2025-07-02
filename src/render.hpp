@@ -58,7 +58,7 @@ public:
         bool firstFrame = true;
 
     void drawAddQuizTable(float width, float height, 
-            std::vector<std::array<char, 32>>& front, std::vector<std::array<char, 32>>& back); // used is addQuiz
+            std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back); // used is addQuiz
     size_t inputCount = 0;
 
     void drawEditQuizTable(float width, float height , quizzes::quiz &Q);

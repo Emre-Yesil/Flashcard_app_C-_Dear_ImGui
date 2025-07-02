@@ -270,7 +270,7 @@ void WindowClass::drawEditQuizTable(float width, float height , quizzes::quiz &Q
     
     inputCount = Q.flashcards.size();
 
-    if(ImGui::BeginTable("##addtable",2, table_flags , ImVec2(width ,height)))
+    if(ImGui::BeginTable("##addtable",2, table_flags))
     {   
         ImGui::TableSetupColumn("Front Side");
         ImGui::TableSetupColumn("Back Side");
@@ -279,12 +279,16 @@ void WindowClass::drawEditQuizTable(float width, float height , quizzes::quiz &Q
         size_t i = 0;
         for(auto& card : Q.flashcards)
         {
+            card.front_side.resize(128);
+            card.back_side.resize(128);
+
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::InputText(("##frontSide"+ std::to_string(i)).c_str(), card.front_side.data(), card.front_side.size());
+            ImGui::SetNextItemWidth(width / 3);
+            ImGui::InputText(("##frontSide"+ std::to_string(i)).c_str(), card.front_side.data(), 128);
             ImGui::TableSetColumnIndex(1);
-            ImGui::InputText(("##backSide"+ std::to_string(i)).c_str(), card.back_side.data(), card.back_side.size());
-            std::cout <<card.front_side << " - " << card.back_side << std::endl; 
+            ImGui::SetNextItemWidth(width / 3);
+            ImGui::InputText(("##backSide"+ std::to_string(i)).c_str(), card.back_side.data(), 128); 
             i++;
         }
         /*
@@ -334,8 +338,8 @@ void WindowClass::addQuiz(float width, float height)
 
     constexpr static auto childFlags = ImGuiChildFlags_Borders | ImGuiChildFlags_AlwaysUseWindowPadding;
 
-    static std::vector<std::array<char, 32>> front(1);
-    static std::vector<std::array<char, 32>> back(1);
+    static std::vector<std::array<char, 128>> front(1);
+    static std::vector<std::array<char, 128>> back(1);
 
     static char nameLog[32] = "";
 
@@ -417,7 +421,7 @@ void WindowClass::addQuiz(float width, float height)
 }
 
 void WindowClass::drawAddQuizTable(float width, float height, 
-            std::vector<std::array<char, 32>>& front, std::vector<std::array<char, 32>>& back)
+            std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back)
 {
     constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
 
@@ -436,8 +440,10 @@ void WindowClass::drawAddQuizTable(float width, float height,
             {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
+                ImGui::SetNextItemWidth(width / 3);
                 ImGui::InputText(("##frontSide"+ std::to_string(i)).c_str(), front[i].data(), front[i].size());
                 ImGui::TableSetColumnIndex(1);
+                ImGui::SetNextItemWidth(width / 3);
                 ImGui::InputText(("##backSide" + std::to_string(i)).c_str(), back[i].data(), back[i].size());
             }
         
