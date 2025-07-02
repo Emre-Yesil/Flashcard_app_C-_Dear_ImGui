@@ -6,21 +6,6 @@
 
 #include "quizzes.hpp"
 
-void quizzes::Draw_Quizlist()
-{
-    if(quizList.empty())
-    {
-        ImGui::Selectable("Empty", false);
-    }
-        
-    for(const auto &quiz : quizList)
-    {   
-        if(ImGui::Selectable(quiz.data(), selected_quiz == quiz.data()))
-        {
-            selected_quiz = quiz.data();
-        }
-    }
-}
 void quizzes::save_quiz_to_file(std::string quizName)
 {
 

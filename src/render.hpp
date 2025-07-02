@@ -29,8 +29,9 @@ public:
     ImFont *giantFont = nullptr;
 
     bool addQuizPopupOpen = false;
+    bool editQuizPopupOpen = false;
 
-    char nameLog[32] = "";
+    //char nameLog[32] = "";
 
     enum themes{
         dark = 0,
@@ -45,17 +46,22 @@ public:
 
     void Draw(std::string_view label, float width, float height); //it draw main ui
 
+    void Draw_Quizlist();
+
     void Draw_top_bar();
 
     void addQuiz(float width, float height);
 
     void saveQuiz();
 
-    void editQuiz(float width, float height);
+    void editQuiz(std::string Qname, float width, float height);
+        bool firstFrame = true;
 
     void drawAddQuizTable(float width, float height, 
             std::vector<std::array<char, 32>>& front, std::vector<std::array<char, 32>>& back); // used is addQuiz
     size_t inputCount = 0;
+
+    void drawEditQuizTable(float width, float height , quizzes::quiz &Q);
 
     void InitFont();
 

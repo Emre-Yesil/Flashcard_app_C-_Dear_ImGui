@@ -29,7 +29,6 @@ public:
 
     std::string selected_quiz;
 
-    void Draw_Quizlist();
 
     void save_quiz_list_to_file(std::string_view fileName);
     void load_quiz_list_from_file(std::string_view fileName);
