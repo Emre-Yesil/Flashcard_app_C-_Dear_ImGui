@@ -2,7 +2,7 @@
 
 #include <fmt/format.h>
 #include <imgui.h>
-#include <implot.h>
+//#include <implot.h>
 #include <fstream>
 #include <shlobj.h>
 #include <string>
@@ -26,15 +26,16 @@
     -draw()-
         |--topBar(ADD FEATURES)
         |   |--addQuiz(NOT DONE)
-        |       |--drawAddTable
+        |       |--drawAddTable(DONE)
         |       |--save_to_file(NOT DONE)
         |
-        |--QuizMenu(NOT DONE)
+        |--QuizMenu(DONE)
         |   |--drawQuizList(DONE)
         |   |--"right clict to play or edit inside (DONE)"
         |
         |--editQuiz(IMMPROVABLE)
         |   |--drawEditQuizTable(NOT DONE)
+        |   |--error at cancel button(NOT DONE)
         |
         |--PlayMenu(NOT STARTED)
         |
@@ -55,6 +56,12 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     const auto window_pos = ImVec2(0.0F, 0.0F);
 
     ImGui::PushFont(getFont(fontSize::Medium));
+
+    if(mainFirstFrame)
+    {
+        quiz_obj.load_quiz_list_from_file(quiz_obj.quizListFile);
+        mainFirstFrame = false;
+    }
 
     ImGui::SetNextWindowSize(window_size);
     ImGui::SetNextWindowPos(window_pos);
@@ -103,6 +110,7 @@ void WindowClass::Draw_Quizlist(){
     if(quiz_obj.quizList.empty())
     {
         ImGui::Selectable("Empty", false);
+        return;
     }
         
     for(const auto &quiz : quiz_obj.quizList)
@@ -111,11 +119,12 @@ void WindowClass::Draw_Quizlist(){
         {
             quiz_obj.selected_quiz = quiz.data();
         }
-        if(ImGui::IsItemClicked(ImGuiMouseButton_Right))
+        std::string uniqueName= "##quizContexMenu" + quiz;
+        if(ImGui::IsItemFocused() &&ImGui::IsItemClicked(ImGuiMouseButton_Right))
         {
-            ImGui::OpenPopup("##quizContexMenu");
+            ImGui::OpenPopup(uniqueName.c_str());
         }
-        if(ImGui::BeginPopupContextItem("##quizContexMenu"))
+        if(ImGui::BeginPopupContextItem(uniqueName.c_str()))
         {
             if(ImGui::MenuItem("start quiz"))
             {
@@ -124,6 +133,7 @@ void WindowClass::Draw_Quizlist(){
             if(ImGui::MenuItem("edit quiz"))
             {
                 editQuizPopupOpen = true;
+                quiz_obj.load_quiz_from_file(quiz.data());
             }
             ImGui::EndPopup();
         }
@@ -160,12 +170,8 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
 
     static char nameLog[32];
     if(firstFrame)
-        strcpy(nameLog, Qname.data()); // look at it later
-       
-    //static std::vector<std::array<char, 32>> front(1);
-    //static std::vector<std::array<char, 32>> back(1);
-
-    //std::vector<flashcard::card> card(Q.flashcards);
+        strcpy_s(nameLog, sizeof(nameLog), Qname.data());
+    
     static quizzes::quiz tmp;
     if(firstFrame)
     {
@@ -187,14 +193,16 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
         ImGui::SetNextWindowPos(ImVec2(2* popup_padding, 2* popup_padding));
         ImGui::BeginChild("##setting_menu", ImVec2((width/4) - (2 * popup_padding), height - (4 * popup_padding)), childFlags);
             
-        if(ImGui::Button("Save") && strlen(nameLog) > 0) // quiz name cant be same 
+        if(ImGui::Button("Save") && strlen(nameLog) > 0 && 
+            (strcmp(nameLog, Qname.data()) == 0 || 
+            std::find(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), std::string(nameLog)) == quiz_obj.quizList.end())) // quiz name cant be same 
         {
             quiz_obj.Quizzes[Qname].flashcards.clear();
             quiz_obj.Quizzes.erase(Qname);
             quiz_obj.Quizzes[std::string(nameLog)].flashcards = tmp.flashcards;
             quiz_obj.Quizzes[std::string(nameLog)].name = std::string(nameLog);
 
-            quiz_obj.quizList.erase(std::remove(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), Qname));
+            quiz_obj.quizList.erase(std::remove(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), Qname), quiz_obj.quizList.end());
             quiz_obj.quizList.push_back(std::string(nameLog));
 
             quiz_obj.save_quiz_list_to_file(quiz_obj.quizListFile);
@@ -206,25 +214,20 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             firstFrame = true;
             editQuizPopupOpen = false;
 
-            //may need delete and intitalize map again
-            /*
-            quiz_obj.Quizzes[Qname].flashcards = tmp.flashcards;
-            quiz_obj.Quizzes[Qname].name = std::string(nameLog);
-            quiz_obj.quizList.erase(std::remove(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), Qname));
-            quiz_obj.quizList.push_back(std::string(nameLog));
-            memset(nameLog, 0, sizeof(nameLog));
-            quiz_obj.save_quiz_list_to_file(quiz_obj.quizListFile);
-            quiz_obj.save_quiz_to_file(std::string(nameLog));
-            editQuizPopupOpen = false;
-            */
+            ImGui::EndChild();
+            ImGui::EndPopup();
         }
-
+        
         ImGui::SameLine();
 
         if(ImGui::Button("Cancel"))
         {
             memset(nameLog, 0, sizeof(nameLog));
-
+            tmp.name.clear();
+            for(auto& card : tmp.flashcards){
+                card.front_side.clear();
+                card.back_side.clear();
+            }
             firstFrame = true;
             editQuizPopupOpen = false;
         }
@@ -255,7 +258,6 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
 
         drawEditQuizTable(width, height, tmp);
         
-
         ImGui::EndChild();
         ImGui::EndPopup();
     }
@@ -265,8 +267,6 @@ void WindowClass::drawEditQuizTable(float width, float height , quizzes::quiz &Q
 {
    constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
 
-    //static std::vector<std::array<char, 32>> front(1);
-    //static std::vector<std::array<char, 32>> back(1);
     
     inputCount = Q.flashcards.size();
 
@@ -286,39 +286,12 @@ void WindowClass::drawEditQuizTable(float width, float height , quizzes::quiz &Q
             ImGui::TableSetColumnIndex(0);
             ImGui::SetNextItemWidth(width / 3);
             ImGui::InputText(("##frontSide"+ std::to_string(i)).c_str(), card.front_side.data(), 128);
+            //ImGui::InputTextMultiline(("##frontSide"+ std::to_string(i)).c_str(), card.front_side.data(),128, ImVec2(width / 3, ImGui::GetTextLineHeight()));
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(width / 3);
             ImGui::InputText(("##backSide"+ std::to_string(i)).c_str(), card.back_side.data(), 128); 
             i++;
         }
-        /*
-        may it is true
-        for (auto& card : Q.flashcards)
-        {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-
-            char bufferFront[256];
-            strncpy(bufferFront, card.front_side.c_str(), sizeof(bufferFront));
-            bufferFront[sizeof(bufferFront) - 1] = '\0'; // null terminate
-
-            if (ImGui::InputText(("##frontSide" + std::to_string(i)).c_str(), bufferFront, sizeof(bufferFront))) {
-                card.front_side = std::string(bufferFront);
-            }
-
-            ImGui::TableSetColumnIndex(1);
-
-            char bufferBack[256];
-            strncpy(bufferBack, card.back_side.c_str(), sizeof(bufferBack));
-            bufferBack[sizeof(bufferBack) - 1] = '\0'; // null terminate
-
-            if (ImGui::InputText(("##backSide" + std::to_string(i)).c_str(), bufferBack, sizeof(bufferBack))) {
-                card.back_side = std::string(bufferBack);
-            }
-
-            i++;
-        }
-        */
 
         if (!Q.flashcards.empty()) 
         {
@@ -370,6 +343,7 @@ void WindowClass::addQuiz(float width, float height)
             }
 
             quiz_obj.save_quiz_to_file(str);
+            quiz_obj.save_quiz_list_to_file(quiz_obj.quizListFile);
             memset(nameLog, 0, sizeof(nameLog));
             front.clear();
             front.resize(1);
@@ -458,6 +432,11 @@ void WindowClass::drawAddQuizTable(float width, float height,
                 
             ImGui::EndTable();
         }
+}
+
+void WindowClass::startQuiz(std::string Qname)
+{
+
 }
 
 

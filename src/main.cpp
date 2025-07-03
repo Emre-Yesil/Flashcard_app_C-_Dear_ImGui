@@ -118,6 +118,7 @@ int main(int, char **)
     style.Colors[ImGuiCol_TableBorderLight] = ImVec4(1.0, 1.0, 1.0, 1.0);
 
     WindowClass window_obj;
+    quizzes quiz_obj;
     
     window_obj.InitFont();
 

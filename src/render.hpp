@@ -28,10 +28,6 @@ public:
     ImFont *bigFont = nullptr;
     ImFont *giantFont = nullptr;
 
-    bool addQuizPopupOpen = false;
-    bool editQuizPopupOpen = false;
-
-    //char nameLog[32] = "";
 
     enum themes{
         dark = 0,
@@ -42,30 +38,33 @@ public:
         green
     };
 
-    void setTheme(enum themes e);
-
     void Draw(std::string_view label, float width, float height); //it draw main ui
+        bool mainFirstFrame = true;
 
     void Draw_Quizlist();
 
     void Draw_top_bar();
 
     void addQuiz(float width, float height);
+        bool addQuizPopupOpen = false;
+    void drawAddQuizTable(float width, float height, 
+            std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back); // used is addQuiz
+        size_t inputCount = 0;
 
-    void saveQuiz();
 
     void editQuiz(std::string Qname, float width, float height);
         bool firstFrame = true;
-
-    void drawAddQuizTable(float width, float height, 
-            std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back); // used is addQuiz
-    size_t inputCount = 0;
+        bool editQuizPopupOpen = false;
 
     void drawEditQuizTable(float width, float height , quizzes::quiz &Q);
+
+    void startQuiz(std::string Qname);
 
     void InitFont();
 
     ImFont *getFont(enum class fontSize e);
+
+    void setTheme(enum themes e);
 }; 
 
 void render(WindowClass &window_obj, int width, int height);
