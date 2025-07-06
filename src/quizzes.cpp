@@ -38,6 +38,7 @@ void quizzes::save_quiz_to_file(std::string quizName)
     std::cout<<"quiz saved to file: "<<quizName<<".bin\n";
 
 }
+
 void quizzes::load_quiz_from_file(std::string quizName)
 {
     std::ifstream in(quizName + ".bin", std::ios::binary);
@@ -78,7 +79,6 @@ void quizzes::load_quiz_from_file(std::string quizName)
         Quizzes[name].flashcards.push_back(tmp);
     }
     in.close();
-    quizList.push_back(name);
     std::cout<<"quiz loaded from file: "<<quizName<<".bin\n";
 }
 

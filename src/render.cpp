@@ -35,7 +35,7 @@
         |
         |--editQuiz(IMMPROVABLE)
         |   |--drawEditQuizTable(NOT DONE)
-        |   |--error at cancel button(NOT DONE)
+        |   |--error at cancel button(DONE)"Do not use copilot again!"
         |
         |--PlayMenu(NOT STARTED)
         |
@@ -56,6 +56,7 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     const auto window_pos = ImVec2(0.0F, 0.0F);
 
     ImGui::PushFont(getFont(fontSize::Medium));
+    setTheme(themes::pink);
 
     if(mainFirstFrame)
     {
@@ -126,14 +127,18 @@ void WindowClass::Draw_Quizlist(){
         }
         if(ImGui::BeginPopupContextItem(uniqueName.c_str()))
         {
-            if(ImGui::MenuItem("start quiz"))
+            if(ImGui::MenuItem("start"))
             {
                 //startQuiz
             }
-            if(ImGui::MenuItem("edit quiz"))
+            if(ImGui::MenuItem("edit"))
             {
-                editQuizPopupOpen = true;
                 quiz_obj.load_quiz_from_file(quiz.data());
+                editQuizPopupOpen = true;
+            }
+            if(ImGui::MenuItem("delete"))
+            {
+
             }
             ImGui::EndPopup();
         }
@@ -216,6 +221,7 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
 
             ImGui::EndChild();
             ImGui::EndPopup();
+            return;
         }
         
         ImGui::SameLine();
@@ -223,13 +229,13 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
         if(ImGui::Button("Cancel"))
         {
             memset(nameLog, 0, sizeof(nameLog));
-            tmp.name.clear();
-            for(auto& card : tmp.flashcards){
-                card.front_side.clear();
-                card.back_side.clear();
-            }
+            tmp.flashcards.clear();
             firstFrame = true;
             editQuizPopupOpen = false;
+
+            ImGui::EndChild();
+            ImGui::EndPopup();
+            return; 
         }
 
         ImGui::EndChild();
@@ -398,9 +404,6 @@ void WindowClass::drawAddQuizTable(float width, float height,
             std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back)
 {
     constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
-
-    //static std::vector<std::array<char, 32>> front(1);
-    //static std::vector<std::array<char, 32>> back(1);
     
     inputCount = front.size();
     
@@ -465,6 +468,78 @@ ImFont * WindowClass::getFont(enum class fontSize e)
     case fontSize::Giant : return giantFont; break;
     
     default: return mediumFont; break;
+    }
+}
+
+void WindowClass::setTheme(enum themes e)
+{
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    switch (e)
+    {
+    case themes::dark:
+        //colors[ImGuiCol_WindowBg] = ImVec4();
+        break;
+    
+    case themes::light:
+        /* code */
+        break;
+    case themes::blue:
+        //general
+        colors[ImGuiCol_WindowBg] = ImVec4(0.22745F, 0.34901F, 0.81960F, 1.0F); //col1 rgb(58, 89, 209) //darker col1 rgb(40, 68, 173)
+        colors[ImGuiCol_ChildBg]  = ImVec4(0.23921F, 0.56470F, 0.84313F, 1.0F); //col2 rgb(61, 144, 215) //ligthen col2 rgb(93, 161, 221)
+        colors[ImGuiCol_PopupBg]  = ImVec4(0.47843F, 0.77647F, 0.82352F, 1.0F); //col3 rgb(122, 198, 210)
+        colors[ImGuiCol_Border]   = ImVec4(0.28372F, 0.66976F, 1.0F, 1.0F);
+
+        //button
+        colors[ImGuiCol_Button]        =  ImVec4(0.70980F, 0.98823F, 0.80392F, 1.0F);   // col4  rgb(181, 252, 205)
+        colors[ImGuiCol_ButtonHovered] =  ImVec4(0.54509F, 0.98039F, 0.694110F, 1.0F);  //darken col4 rgb(139, 250, 177)
+        colors[ImGuiCol_ButtonActive]  =  ImVec4(0.28372F, 0.66976F, 1.0F, 1.0F);       // darken col4
+
+        //table
+        colors[ImGuiCol_Tab]        = ImVec4(0.36470F, 0.63137F, 0.086666F, 1.0F);  //ligthen col2 rgb(93, 161, 221)
+        colors[ImGuiCol_TabHovered] = ImVec4(0.54509F, 0.98039F, 0.694110F, 1.0F);  //darken col4 rgb(139, 250, 177)
+        colors[ImGuiCol_TabActive]  = ImVec4(0.70980F, 0.98823F, 0.80392F, 1.0F);   // col4  rgb(181, 252, 205)
+
+        break;
+    case themes::pink:
+        //colors
+        //col1 rgb(255, 237, 250) ImVec4(1.0F, 0.92941F, 0.98039F, 1.0F);
+        //col2 rgb(255, 184, 224) ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F);
+        //col3 rgb(236, 127, 169) ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F);
+        //col4 rgb(190, 89, 133)  ImVec4(0.74509F, 0.34901F, 0.52156F, 1.0F);
+        
+
+        //general
+        colors[ImGuiCol_WindowBg] = ImVec4(1.0F, 0.92941F, 0.98039F, 1.0F); //col1 rgb(255, 237, 250)
+        colors[ImGuiCol_ChildBg]  = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
+        colors[ImGuiCol_PopupBg]  = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
+        colors[ImGuiCol_Border]   = ImVec4(0.74509F, 0.34901F, 0.52156F, 1.0F); //col4 rgb(190, 89, 133)
+
+        //button
+        colors[ImGuiCol_Button]        =  ImVec4(0.70980F, 0.98823F, 0.80392F, 1.0F);   // col4  rgb(181, 252, 205)
+        colors[ImGuiCol_ButtonHovered] =  ImVec4(0.54509F, 0.98039F, 0.694110F, 1.0F);  //darken col4 rgb(139, 250, 178)
+        colors[ImGuiCol_ButtonActive]  =  ImVec4(0.28372F, 0.66976F, 1.0F, 1.0F);       // darken col4
+
+        //text
+        //colors[ImGuiCol_Text] = ImVec4(1.0F, 1.0F, 1.0F, 1.0F);
+
+        //table
+        colors[ImGuiCol_Tab]        = ImVec4(0.36470F, 0.63137F, 0.086666F, 1.0F);  //ligthen col2 rgb(93, 161, 221)
+        colors[ImGuiCol_TabHovered] = ImVec4(0.54509F, 0.98039F, 0.694110F, 1.0F);  //darken col4 rgb(139, 250, 177)
+        colors[ImGuiCol_TabActive]  = ImVec4(0.70980F, 0.98823F, 0.80392F, 1.0F);   // col4  rgb(181, 252, 205)
+
+        break;
+    case themes::yellow:
+        /* code */
+        break;
+
+    case themes::green:
+        /* code */
+        break;
+    default:
+        break;
     }
 }
 
