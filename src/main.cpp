@@ -106,21 +106,11 @@ int main(int, char **)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    auto &style = ImGui::GetStyle();
-    /*
-    style.WindowPadding = ImVec2(0, 0);        // pencere içi kenar boşluğu
-    style.FramePadding  = ImVec2(2, 2);        // buton ve input içi boşluk
-    style.ItemSpacing   = ImVec2(4, 4);        // iki öğe arası boşluk
-    style.ItemInnerSpacing = ImVec2(2, 2);     // aynı grup içindeki öğeler arası boşluk
-    */
-
-    style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(1.0, 1.0, 1.0, 1.0);
-    style.Colors[ImGuiCol_TableBorderLight] = ImVec4(1.0, 1.0, 1.0, 1.0);
-
     WindowClass window_obj;
     quizzes quiz_obj;
     
     window_obj.InitFont();
+    window_obj.setTheme(WindowClass::themes::pink);
 
     while (!glfwWindowShouldClose(window))
     {

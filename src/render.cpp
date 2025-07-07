@@ -13,36 +13,34 @@
 #include "game.cpp"
 
 /*
-    main interface düzelt
-
     -quizzes_class-
-        |--"save to file"(NOT STARTED)
-        |--"load to file"(NOT STARTED)
+        |--"also can be add new quiz data for example game settting"
+        |--"save to file"(DONE)
+        |--"load to file"(DONE)
         |--"save and load list"(DONE)
 
-    -Featres-
+    -Features-
         |--"changing font size"(DONE)
-        |--"change theme"(NOT STARTED)
+        |--"change theme"(DONE)
+        |--"themes are not perfect"(NOT DONE)
 
     -draw()-
         |--topBar(ADD FEATURES)
-        |   |--addQuiz(NOT DONE)
-        |       |--drawAddTable(DONE)
-        |       |--save_to_file(NOT DONE)
+        |   |--addQuiz(DONE)
+        |   |   |--drawAddTable(DONE)
+        |   |   |--save_to_file(DONE)
+        |   |--Ui setting menu(NOT DONE)
+        |   |   |--change theme (DONE)
+        |   |   |--slider(NOT STARTED) "alos need to edit init font function"
         |
         |--QuizMenu(DONE)
         |   |--drawQuizList(DONE)
         |   |--"right clict to play or edit inside (DONE)"
         |
         |--editQuiz(IMMPROVABLE)
-        |   |--drawEditQuizTable(NOT DONE)
-        |   |--error at cancel button(DONE)"Do not use copilot again!"
-        |
-        |--PlayMenu(NOT STARTED)
-        |
-        |--
-
-    dark mode
+        |   |--drawEditQuizTable(DONE)
+        |   |--"error at cancel button(DONE) Do not use copilot again!"
+        |   |--"quiz settings"(NOT DONE)
 */
 
 void WindowClass::Draw(std::string_view label, const float width, const float height)
@@ -57,7 +55,6 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     const auto window_pos = ImVec2(0.0F, 0.0F);
 
     ImGui::PushFont(getFont(fontSize::Medium));
-    setTheme(themes::pink);
 
     if(mainFirstFrame)
     {
@@ -169,17 +166,14 @@ void WindowClass::Draw_top_bar()
             if (ImGui::BeginMenu("Theme"))
             {
                 if (ImGui::MenuItem("Dark"))
-                {
-                    // Apply dark theme
-                }
+                    setTheme(themes::dark);
+                
                 if (ImGui::MenuItem("Light"))
-                {
-                    // Apply light theme
-                }
+                    setTheme(themes::light);
+
                 if (ImGui::MenuItem("Pink"))
-                {
-                    // Apply pink theme
-                }
+                    setTheme(themes::pink);
+
                 ImGui::EndMenu();
             }
 
@@ -230,21 +224,23 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
         //setting child
         ImGui::SetNextWindowPos(ImVec2(2* popup_padding, 2* popup_padding));
         ImGui::BeginChild("##setting_menu", ImVec2((width/4) - (2 * popup_padding), height - (4 * popup_padding)), childFlags);
-            
+        
+        //save
         if(ImGui::Button("Save") && strlen(nameLog) > 0 && 
             (strcmp(nameLog, Qname.data()) == 0 || 
             std::find(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), std::string(nameLog)) == quiz_obj.quizList.end())) // quiz name cant be same 
         {
+            std::string newName = std::string(nameLog);
             quiz_obj.Quizzes[Qname].flashcards.clear();
             quiz_obj.Quizzes.erase(Qname);
-            quiz_obj.Quizzes[std::string(nameLog)].flashcards = tmp.flashcards;
-            quiz_obj.Quizzes[std::string(nameLog)].name = std::string(nameLog);
+            quiz_obj.Quizzes[newName].flashcards = tmp.flashcards;
+            quiz_obj.Quizzes[newName].name = newName;
 
             quiz_obj.quizList.erase(std::remove(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), Qname), quiz_obj.quizList.end());
-            quiz_obj.quizList.push_back(std::string(nameLog));
+            quiz_obj.quizList.push_back(newName);
 
             quiz_obj.save_quiz_list_to_file(quiz_obj.quizListFile);
-            quiz_obj.save_quiz_to_file(std::string(nameLog));
+            quiz_obj.save_quiz_to_file(newName , Qname); //Qname is old
 
             memset(nameLog, 0, sizeof(nameLog));
             tmp.flashcards.clear();
@@ -381,7 +377,7 @@ void WindowClass::addQuiz(float width, float height)
                 quiz_obj.Quizzes[str].flashcards.push_back(flashcard::card{std::string(front[i].data()), std::string(back[i].data())});
             }
 
-            quiz_obj.save_quiz_to_file(str);
+            quiz_obj.save_quiz_to_file(str, str);
             quiz_obj.save_quiz_list_to_file(quiz_obj.quizListFile);
             memset(nameLog, 0, sizeof(nameLog));
             front.clear();

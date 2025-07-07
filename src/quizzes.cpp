@@ -1,12 +1,13 @@
 
-#include<fstream>
+#include <fstream>
+#include <filesystem>
 #include <string>
 #include <iostream>
 #include <imgui.h>
 
 #include "quizzes.hpp"
 
-void quizzes::save_quiz_to_file(std::string quizName)
+void quizzes::save_quiz_to_file(std::string quizName, std::string oldName)
 {
     std::ofstream out(quizName + ".bin", std::ios::binary);
 
@@ -15,7 +16,10 @@ void quizzes::save_quiz_to_file(std::string quizName)
         std::cout<<"error at save from file (quiz)\n";
         return;
     }
-
+    std::cout<<oldName<<std::endl;
+    if(quizName != oldName)
+        std::filesystem::remove(oldName + ".bin");
+    
     size_t nameSize = quizName.length();
     out.write(reinterpret_cast<const char*>(&nameSize), sizeof(nameSize));
     out.write(quizName.data(), nameSize);
@@ -139,6 +143,11 @@ void quizzes::load_quiz_list_from_file(std::string_view fileName)
     {
         std::cout<<"quiz name: "<<quiz<<"\n";
     }
+}
+
+void quizzes::delete_quiz_file(const std::string fileName)
+{
+
 }
 
 quizzes::quizzes()

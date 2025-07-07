@@ -29,12 +29,19 @@ public:
 
     std::string selected_quiz;
 
+    //GAME
+    void startQuiz(std::string Qname);
 
+
+
+    //save and load stuffs
     void save_quiz_list_to_file(std::string_view fileName);
     void load_quiz_list_from_file(std::string_view fileName);
 
-    void save_quiz_to_file(std::string quizName);
+    void save_quiz_to_file(std::string quizName, std::string oldName);
     void load_quiz_from_file(std::string quizName);
+
+    void delete_quiz_file(const std::string fileName);
 
     quizzes(/* args */); //constructer  quizzes.addCardToQuiz("Math", {"2+2", "4"});
     ~quizzes(); //deconstructer

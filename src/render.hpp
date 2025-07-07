@@ -55,10 +55,6 @@ public:
 
     void drawEditQuizTable(float width, float height , quizzes::quiz &Q);
 
-
-    //game
-    void startQuiz(std::string Qname);
-
     void InitFont();
 
     ImFont *getFont(enum class fontSize e);
