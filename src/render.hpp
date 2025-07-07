@@ -32,10 +32,7 @@ public:
     enum themes{
         dark = 0,
         light,
-        blue,
         pink,
-        yellow,
-        green
     };
 
     void Draw(std::string_view label, float width, float height); //it draw main ui
@@ -58,6 +55,8 @@ public:
 
     void drawEditQuizTable(float width, float height , quizzes::quiz &Q);
 
+
+    //game
     void startQuiz(std::string Qname);
 
     void InitFont();
