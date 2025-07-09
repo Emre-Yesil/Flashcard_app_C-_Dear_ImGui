@@ -21,7 +21,7 @@ public:
     constexpr static auto popup_padding = 20.0F;
     constexpr static auto main_padding = 20.0F;
 
-    enum class fontSize { Small, Medium, Large, Giant };
+    enum class fontSize { Small, Medium, Large, Giant};
 
     ImFont *smallFont = nullptr;
     ImFont *mediumFont = nullptr;
@@ -38,16 +38,17 @@ public:
     void Draw(std::string_view label, float width, float height); //it draw main ui
         bool mainFirstFrame = true;
 
-    void Draw_Quizlist();
+    void Draw_Quizlist(float width, float height);
+    bool startQuizOpen = false;
 
     void Draw_top_bar();
 
     void addQuiz(float width, float height);
         bool addQuizPopupOpen = false;
+
     void drawAddQuizTable(float width, float height, 
             std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back); // used is addQuiz
         size_t inputCount = 0;
-
 
     void editQuiz(std::string Qname, float width, float height);
         bool firstFrame = true;

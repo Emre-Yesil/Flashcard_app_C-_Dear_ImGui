@@ -10,7 +10,8 @@
 #include <array>
 
 #include "render.hpp"
-#include "game.cpp"
+#include "quizzes.hpp"
+
 
 /*
     -quizzes_class-
@@ -71,9 +72,10 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     Draw_top_bar();
     
     //quizMenu begin
-    ImGui::BeginChild("quizMenu", ImVec2(width/4, height - 40.0F), childFlags);
+    ImGui::SetNextWindowPos(ImVec2(main_padding, 2 * main_padding));
+    ImGui::BeginChild("quizMenu", ImVec2((width - (3*main_padding))/4 , height - (3*main_padding)), childFlags);
 
-    Draw_Quizlist();
+    Draw_Quizlist(width, height);
         
     ImGui::EndChild();
 
@@ -82,29 +84,32 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     //-------------------
 
     //play menu draw
-    ImGui::BeginChild("playMenu", ImVec2(3 * (width/4)-20.0F, height-40.0F), childFlags);
+    ImGui::SetNextWindowPos(ImVec2(width/4 + 5*(main_padding/4), 2* main_padding));
+    ImGui::BeginChild("playMenu", ImVec2(3*((width-(3*main_padding))/4), height-(3*main_padding)), childFlags);  
+    if(startQuizOpen)
+        quiz_obj.startQuiz(quiz_obj.selected_quiz,(3*(width-(3*main_padding))/4), height-3*main_padding);
 
     ImGui::EndChild();
 
     ImGui::End();
 
+    //edit it
     if(addQuizPopupOpen)
+    {
         ImGui::OpenPopup("##addQuiz");
-    
-    if(addQuizPopupOpen)
         addQuiz(width, height);
-    
+    }
+        
     if(editQuizPopupOpen)
+    {
         ImGui::OpenPopup("##editQuiz");
-
-    if(editQuizPopupOpen)
         editQuiz(quiz_obj.selected_quiz, width, height);
-    
+    }
     ImGui::PopFont();
         
 }
 
-void WindowClass::Draw_Quizlist(){
+void WindowClass::Draw_Quizlist(float width, float height){
 
     if(quiz_obj.quizList.empty())
     {
@@ -127,7 +132,7 @@ void WindowClass::Draw_Quizlist(){
         {
             if(ImGui::MenuItem("start"))
             {
-                //startQuiz
+                startQuizOpen = true;
             }
             if(ImGui::MenuItem("edit"))
             {
@@ -607,7 +612,6 @@ void WindowClass::setTheme(enum themes e)
         break;
     }
 }
-
 
 void render(WindowClass &window_obj, int width, int height)
 {

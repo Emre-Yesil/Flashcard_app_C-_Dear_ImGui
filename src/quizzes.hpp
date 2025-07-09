@@ -30,8 +30,7 @@ public:
     std::string selected_quiz;
 
     //GAME
-    void startQuiz(std::string Qname);
-
+    void startQuiz(std::string Qname, float width, float height);
 
 
     //save and load stuffs

@@ -105,10 +105,11 @@ int main(int, char **)
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
-
-    WindowClass window_obj;
-    quizzes quiz_obj;
     
+    //global
+    quizzes quiz_obj;
+    WindowClass window_obj;
+
     window_obj.InitFont();
     window_obj.setTheme(WindowClass::themes::pink);
 
