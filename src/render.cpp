@@ -87,7 +87,11 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     ImGui::SetNextWindowPos(ImVec2(width/4 + 5*(main_padding/4), 2* main_padding));
     ImGui::BeginChild("playMenu", ImVec2(3*((width-(3*main_padding))/4), height-(3*main_padding)), childFlags);  
     if(startQuizOpen)
-        quiz_obj.startQuiz(quiz_obj.selected_quiz,(3*(width-(3*main_padding))/4), height-3*main_padding);
+    {
+        ImFont* myFont = getFont(fontSize::Giant);
+        quiz_obj.startQuiz(quiz_obj.selected_quiz,(3*(width-(3*main_padding))/4), height-3*main_padding, myFont);
+    }
+        
 
     ImGui::EndChild();
 
@@ -498,6 +502,7 @@ ImFont * WindowClass::getFont(enum class fontSize e)
     default: return mediumFont; break;
     }
 }
+
 
 void WindowClass::setTheme(enum themes e)
 {

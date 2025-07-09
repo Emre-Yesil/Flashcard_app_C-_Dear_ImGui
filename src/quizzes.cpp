@@ -29,16 +29,20 @@
         |--"fast answers to question give more score"
         |--"save high score"
 */
+WindowClass window_obj;
 
-void quizzes::startQuiz(std::string Qname, float width, float height)
+void quizzes::startQuiz(std::string Qname, float width, float height, ImFont* giantFont)
 {
-    //ImGui::PushFont(window_obj.getFont(WindowClass::fontSize::Giant));
-    ImGui::Button("Start Quiz");
+    ImVec2 buttonSize(width-(2*window_obj.main_padding), height- (5*window_obj.main_padding));
+    ImGui::PushFont(giantFont);
+    ImGui::SetCursorPos(ImVec2(window_obj.main_padding, window_obj.main_padding));
 
-    ImGui::Text("it was begin");
-    
-    //ImGui::PopFont();
+    if(ImGui::Button(("Start Quiz:\n" + Qname).c_str(), buttonSize))
+    {
+        
 
+    }
+    ImGui::PopFont();
 }
 
 

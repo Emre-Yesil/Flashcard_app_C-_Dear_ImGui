@@ -8,7 +8,6 @@
 #include "quizzes.hpp"
 #include "flashcard.hpp"
 
-
 class WindowClass
 { 
 protected:
@@ -27,7 +26,6 @@ public:
     ImFont *mediumFont = nullptr;
     ImFont *bigFont = nullptr;
     ImFont *giantFont = nullptr;
-
 
     enum themes{
         dark = 0,

@@ -30,7 +30,7 @@ public:
     std::string selected_quiz;
 
     //GAME
-    void startQuiz(std::string Qname, float width, float height);
+    void startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
 
 
     //save and load stuffs
