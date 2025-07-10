@@ -44,18 +44,19 @@ public:
     void addQuiz(float width, float height);
         bool addQuizPopupOpen = false;
 
-    void drawAddQuizTable(float width, float height, 
-            std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back); // used is addQuiz
-        size_t inputCount = 0;
+    //void drawAddQuizTable(float width, float height, 
+    //        std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back); // used is addQuiz
+    size_t inputCount = 0;
 
     void editQuiz(std::string Qname, float width, float height);
         bool firstFrame = true;
         bool editQuizPopupOpen = false;
+    void drawQuizSettings(quizzes::quiz& Q);
 
-    void drawEditQuizTable(float width, float height , quizzes::quiz &Q);
+    void drawQuizTable(float width, float height , quizzes::quiz &Q);
 
     void InitFont();
-
+    
     ImFont *getFont(enum class fontSize e);
 
     void setTheme(enum themes e);

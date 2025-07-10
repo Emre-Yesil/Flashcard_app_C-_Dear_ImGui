@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <chrono>
 
 #include "flashcard.hpp"
 
@@ -16,8 +17,28 @@ public:
     typedef struct quiz
     {
         std::string name;
+
+        int highScore;
+
+        enum quizType{
+            standart,
+            multiple_choice
+        };
+
+        enum quizType type;
+
+        bool timer_on;
+        int timer; //maybe std::chrono
+
+        bool punsih_on;
+        int punishmentToScore;
+
+        bool serial_resposne_open;
+        float serial_response_coefficient;
+
+        int falseAnswerRepeatTime;
+
         std::vector<flashcard::card> flashcards;
-        //alos the other datas
 
     }quiz;
 
@@ -31,7 +52,6 @@ public:
 
     //GAME
     void startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
-
 
     //save and load stuffs
     void save_quiz_list_to_file(std::string_view fileName);

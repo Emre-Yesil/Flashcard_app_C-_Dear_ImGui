@@ -42,6 +42,9 @@
         |   |--drawEditQuizTable(DONE)
         |   |--"error at cancel button(DONE) Do not use copilot again!"
         |   |--"quiz settings"(NOT DONE)
+        |   |--ERRROR when create empty quiz cant be add any flashcard (FIXED)
+        |--addQuiz
+        |   |--make the addQuiz like edit quiz for better desing(DONE)
 */
 
 void WindowClass::Draw(std::string_view label, const float width, const float height)
@@ -200,6 +203,62 @@ void WindowClass::Draw_top_bar()
     }
 }
 
+void WindowClass::drawQuizSettings(quizzes::quiz& Q)
+{
+    //quiz type setting
+    static const char* quizTypes[] = {"Standart", "Multiple Choice"};
+    static int Index = static_cast<int>(Q.type);
+
+    ImGui::Text("Quiz type");
+    ImGui::SameLine();
+    if(ImGui::Combo("##quiz_type", &Index, quizTypes, IM_ARRAYSIZE(quizTypes))) 
+        Q.type = static_cast<quizzes::quiz::quizType>(Index);
+
+    ImGui::Separator();
+
+    //timer
+    ImGui::Checkbox("Timer (second)", &Q.timer_on);
+    
+    if(Q.timer_on)
+    {
+        ImGui::SliderInt("##timer_slider", &Q.timer, 1, 60);
+    }
+    else
+    {
+        Q.timer = 0;  // Optional: reset timer if not active
+    }
+
+    //punishMentScore 
+    ImGui::Checkbox("Punishment Score", &Q.punsih_on);
+    
+    if(Q.punsih_on)
+    {
+        ImGui::SliderInt("##punish_slider", &Q.punishmentToScore, 1, 100);
+    }
+    else
+    {
+        Q.punishmentToScore = 0;  // Optional: reset timer if not active
+    }
+
+    ImGui::Checkbox("Serial response coefficient", &Q.serial_resposne_open);
+    
+    if(Q.serial_resposne_open)
+    {
+        ImGui::SliderFloat("##serial_slider", &Q.serial_response_coefficient, 0, 1);
+    }
+    else
+    {
+        Q.serial_response_coefficient = 0;  // Optional: reset timer if not active
+    }
+
+    ImGui::Text("False answer repeats: ");
+    ImGui::SameLine();
+    ImGui::InputInt("##repeat_false", &Q.falseAnswerRepeatTime, 0, 10); //look at it later
+
+    ImGui::Separator();
+
+}
+
 
 void WindowClass::editQuiz(std::string Qname, float width, float height) //referance may not nessesery
 {
@@ -213,10 +272,11 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
     if(firstFrame)
         strcpy_s(nameLog, sizeof(nameLog), Qname.data());
     
-    static quizzes::quiz tmp;
+    static quizzes::quiz Q;
+
     if(firstFrame)
     {
-        tmp = quiz_obj.Quizzes[Qname];
+        Q = quiz_obj.Quizzes[Qname];
         firstFrame = false;
     }
         
@@ -233,7 +293,9 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
         //setting child
         ImGui::SetNextWindowPos(ImVec2(2* popup_padding, 2* popup_padding));
         ImGui::BeginChild("##setting_menu", ImVec2((width/4) - (2 * popup_padding), height - (4 * popup_padding)), childFlags);
-        
+
+        drawQuizSettings(Q);
+
         //save
         if(ImGui::Button("Save") && strlen(nameLog) > 0 && 
             (strcmp(nameLog, Qname.data()) == 0 || 
@@ -242,8 +304,9 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             std::string newName = std::string(nameLog);
             quiz_obj.Quizzes[Qname].flashcards.clear();
             quiz_obj.Quizzes.erase(Qname);
-            quiz_obj.Quizzes[newName].flashcards = tmp.flashcards;
+            quiz_obj.Quizzes[newName] = Q;
             quiz_obj.Quizzes[newName].name = newName;
+
 
             quiz_obj.quizList.erase(std::remove(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), Qname), quiz_obj.quizList.end());
             quiz_obj.quizList.push_back(newName);
@@ -252,7 +315,7 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             quiz_obj.save_quiz_to_file(newName , Qname); //Qname is old
 
             memset(nameLog, 0, sizeof(nameLog));
-            tmp.flashcards.clear();
+            Q.flashcards.clear();
 
             firstFrame = true;
             editQuizPopupOpen = false;
@@ -267,7 +330,7 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
         if(ImGui::Button("Cancel"))
         {
             memset(nameLog, 0, sizeof(nameLog));
-            tmp.flashcards.clear();
+            Q.flashcards.clear();
             firstFrame = true;
             editQuizPopupOpen = false;
 
@@ -300,14 +363,14 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
         
 
-        drawEditQuizTable(width, height, tmp);
+        drawQuizTable(width, height, Q);
         
         ImGui::EndChild();
         ImGui::EndPopup();
     }
 }
 
-void WindowClass::drawEditQuizTable(float width, float height , quizzes::quiz &Q)
+void WindowClass::drawQuizTable(float width, float height , quizzes::quiz &Q)
 {
    constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
 
@@ -319,6 +382,9 @@ void WindowClass::drawEditQuizTable(float width, float height , quizzes::quiz &Q
         ImGui::TableSetupColumn("Front Side");
         ImGui::TableSetupColumn("Back Side");
         ImGui::TableHeadersRow();
+
+        if(Q.flashcards.size() == 0)
+            Q.flashcards.emplace_back();
 
         size_t i = 0;
         for(auto& card : Q.flashcards)
@@ -355,45 +421,43 @@ void WindowClass::addQuiz(float width, float height)
 
     constexpr static auto childFlags = ImGuiChildFlags_Borders | ImGuiChildFlags_AlwaysUseWindowPadding;
 
-    static std::vector<std::array<char, 128>> front(1);
-    static std::vector<std::array<char, 128>> back(1);
-
     static char nameLog[32] = "";
+
+    static quizzes::quiz Q;
 
     ImGui::SetNextWindowPos(ImVec2(popup_padding, popup_padding));
     ImGui::SetNextWindowSize(ImVec2(width - (2 * popup_padding), height - (2 * popup_padding)));
     if(ImGui::BeginPopupModal("##addQuiz", nullptr, popup_flags))
     {
         //use it ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.2f, 0.5f, 1.0f));
-
         ImGui::Columns(2, "col", false);
         ImGui::SetColumnOffset(1, width / 4);
 
         //setting child
         ImGui::SetNextWindowPos(ImVec2(2* popup_padding, 2* popup_padding));
         ImGui::BeginChild("##setting_menu", ImVec2((width/4) - (2 * popup_padding), height - (4 * popup_padding)), childFlags);
-            
+
+        drawQuizSettings(Q);
+
         if(ImGui::Button("Save") && strlen(nameLog) > 0 && 
             std::find(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), std::string(nameLog)) == quiz_obj.quizList.end())
         {
-            std::string str = std::string(nameLog);
-            quiz_obj.quizList.push_back(str);
-            quiz_obj.Quizzes[str];
-            quiz_obj.Quizzes[str].name = str;
-
-            for(size_t i = 0; i < front.size(); i++)
-            {
-                quiz_obj.Quizzes[str].flashcards.push_back(flashcard::card{std::string(front[i].data()), std::string(back[i].data())});
-            }
-
-            quiz_obj.save_quiz_to_file(str, str);
+            std::string name = std::string(nameLog);
+            quiz_obj.quizList.push_back(name);
+            quiz_obj.Quizzes[name];
+            quiz_obj.Quizzes[name] = Q;
+            quiz_obj.Quizzes[name].name = name;
+            
+            quiz_obj.save_quiz_to_file(name, name);
             quiz_obj.save_quiz_list_to_file(quiz_obj.quizListFile);
+
             memset(nameLog, 0, sizeof(nameLog));
-            front.clear();
-            front.resize(1);
-            back.clear();
-            back.resize(1);
+            Q.flashcards.clear();
+            
             addQuizPopupOpen = false;
+            ImGui::EndChild();
+            ImGui::EndPopup();
+            return;
         }
 
         ImGui::SameLine();
@@ -401,11 +465,12 @@ void WindowClass::addQuiz(float width, float height)
         if(ImGui::Button("Cancel"))
         {
             memset(nameLog, 0, sizeof(nameLog));
-            front.clear();
-            front.resize(1);
-            back.clear();
-            back.resize(1);
+            Q.flashcards.clear();
+
             addQuizPopupOpen = false;
+            ImGui::EndChild();
+            ImGui::EndPopup();
+            return;
         }
 
         ImGui::EndChild();
@@ -431,48 +496,12 @@ void WindowClass::addQuiz(float width, float height)
         ImGui::BeginChild("##addFlashcard_menu", 
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
         
-        drawAddQuizTable(width, height, front, back);
+        //drawAddQuizTable(width, height, front, back);
+        drawQuizTable(width, height, Q);
 
         ImGui::EndChild();
         ImGui::EndPopup();
     }
-}
-
-void WindowClass::drawAddQuizTable(float width, float height, 
-            std::vector<std::array<char, 128>>& front, std::vector<std::array<char, 128>>& back)
-{
-    constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
-    
-    inputCount = front.size();
-    
-    if(ImGui::BeginTable("##addtable",2, table_flags , ImVec2(width ,height)))
-        {   
-            ImGui::TableSetupColumn("Front Side");
-            ImGui::TableSetupColumn("Back Side");
-            ImGui::TableHeadersRow();
-
-            for(size_t i = 0; i < inputCount; i++)
-            {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGui::SetNextItemWidth(width / 3);
-                ImGui::InputText(("##frontSide"+ std::to_string(i)).c_str(), front[i].data(), front[i].size());
-                ImGui::TableSetColumnIndex(1);
-                ImGui::SetNextItemWidth(width / 3);
-                ImGui::InputText(("##backSide" + std::to_string(i)).c_str(), back[i].data(), back[i].size());
-            }
-        
-                const auto& lastFront = front.back();
-                const auto& lastBack = back.back();
-
-                if (strlen(lastFront.data()) > 0 && strlen(lastBack.data()) > 0)
-                {
-                    front.emplace_back(); // adds zero-initialized char[64]
-                    back.emplace_back();
-                }
-                
-            ImGui::EndTable();
-        }
 }
 
 void WindowClass::InitFont(){

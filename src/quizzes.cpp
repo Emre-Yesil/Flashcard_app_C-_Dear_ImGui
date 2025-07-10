@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include <imgui.h>
-#include <shlobj.h>
+#include <random>
 
 #include "quizzes.hpp"
 #include "render.hpp"
@@ -21,7 +21,7 @@
     |--GAME SETTING--|(NOT STARTED)
         |--"false answers appear more"
         |--"no repeat question. it must be optional"
-        |--"timer" 
+        |--"timer"
         |--"multiple choice"
         |--"or just gives the question"
         |--"false answer reduce the score"
@@ -40,7 +40,6 @@ void quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gi
     if(ImGui::Button(("Start Quiz:\n" + Qname).c_str(), buttonSize))
     {
         
-
     }
     ImGui::PopFont();
 }
