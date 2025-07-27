@@ -92,7 +92,7 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     if(startQuizOpen)
     {
         ImFont* myFont = getFont(fontSize::Giant);
-        quiz_obj.startQuiz(quiz_obj.selected_quiz,(3*(width-(3*main_padding))/4), height-3*main_padding, myFont);
+        quiz_obj.startQuiz(quiz_obj.selected_quiz ,(3*(width-(3*main_padding))/4), height-3*main_padding, myFont);
     }
         
 
@@ -139,6 +139,7 @@ void WindowClass::Draw_Quizlist(float width, float height){
         {
             if(ImGui::MenuItem("start"))
             {
+                quiz_obj.load_quiz_from_file(quiz.data());
                 startQuizOpen = true;
             }
             if(ImGui::MenuItem("edit"))
@@ -532,6 +533,16 @@ ImFont * WindowClass::getFont(enum class fontSize e)
     }
 }
 
+
+ImVec4 WindowClass::getColor(WindowClass::colors c)
+{
+    switch (c)
+    {
+    case WindowClass::colors::green: return ImVec4(0.47058F, 0.78431F, 0.25490F, 1.0F); break;
+    case WindowClass::colors::red:   return ImVec4(0.98431F, 0.25490F, 0.25490F, 1.0F); break; 
+    default:  break;
+    }
+}
 
 void WindowClass::setTheme(enum themes e)
 {

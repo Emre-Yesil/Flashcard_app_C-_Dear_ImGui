@@ -50,20 +50,22 @@ public:
     std::string selected_quiz;
 
     //GAME
-    void startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
+    int startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
     bool quiz_started = false;
     void draw_multiple_choice_question();
     void draw_standart_question();
+
+    void draw_end_screen();
 
     int random_between(int min, int max);
 
     struct timerBar{
         bool running = false;
-        int duration;
+        float duration;
         std::chrono::high_resolution_clock::time_point start_time;
     };
     void timer_start(timerBar* timer);
-    void timer_update(timerBar* timer);
+    int timer_update(timerBar* timer, float width);
 
     //save and load stuffs
     void save_quiz_list_to_file(std::string_view fileName);

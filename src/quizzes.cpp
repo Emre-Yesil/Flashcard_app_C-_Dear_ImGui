@@ -35,23 +35,21 @@
 */
 WindowClass window_obj;
 
-void quizzes::startQuiz(std::string Qname, float width, float height, ImFont* giantFont)
+int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* giantFont)
 {
-    ImGui::Begin("##quiz");
     quizzes::quiz q = Quizzes[Qname];
-    size_t quiz_size = q.flashcards.size(); 
+    static size_t quiz_size = q.flashcards.size(); 
     std::vector tmpFlashcards = q.flashcards;
-
     std::map<std::string, int> false_answers;
 
     //set timer
     static timerBar myTimer;
-    if (!quiz_started) // sadece ilk girişte ayarla
+    if (!quiz_started)
     {
         if (q.timer_on)
-            myTimer.duration = q.timer;
+            myTimer.duration = (float)q.timer;
         else
-            myTimer.duration = 0;
+            myTimer.duration = 0.0F;
     }
 
     ImVec2 buttonSize(width-(2*window_obj.main_padding), height- (5*window_obj.main_padding));
@@ -70,7 +68,7 @@ void quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gi
                     timer_start(&myTimer);
                 }
             }        
-            else if(Quizzes[Qname].type == quizzes::quiz::quizType::multiple_choice)
+            else if(q.type == quizzes::quiz::quizType::multiple_choice)
             {
                 if(!myTimer.running && myTimer.duration != 0)
                 {
@@ -80,8 +78,11 @@ void quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gi
         }
     }
     ImGui::PopFont();
-    timer_update(&myTimer);
-    ImGui::End();
+    if(timer_update(&myTimer, width) == 1){
+        draw_end_screen();
+    }
+
+    return 0;
 }
 
 void quizzes::draw_multiple_choice_question()
@@ -93,15 +94,21 @@ void quizzes::draw_standart_question()
 
 }
 
+void quizzes::draw_end_screen()
+{
+
+}
+
 void quizzes::timer_start(timerBar* timer)
 {   
-    timer->start_time = std::chrono::high_resolution_clock::now();
     timer->running = true;
+    timer->start_time = std::chrono::high_resolution_clock::now();
 }
-void quizzes::timer_update(timerBar* timer)
+
+int quizzes::timer_update(timerBar* timer, float width)
 {
     if(!timer->running)
-        return;
+        return 0;
     
     auto now = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> elapse = now - timer->start_time;
@@ -110,10 +117,13 @@ void quizzes::timer_update(timerBar* timer)
     if(progress >= 1.0F){
         progress = 1.0f;
         timer->running = false;
+        return 1;
     }
 
-    ImGui::ProgressBar(progress, ImVec2(300, 20));
-    ImGui::Text("%.1f saniye kaldi", timer->duration * (1.0f - progress));
+    std::string label = std::to_string((int)elapse.count()) + "/" + std::to_string((int)timer->duration);
+    ImGui::PushStyleColor(ImGuiCol_PlotHistogram ,window_obj.getColor(WindowClass::colors::green));
+    ImGui::ProgressBar(progress, ImVec2(width - 2 * window_obj.popup_padding , 20), label.data());
+    ImGui::PopStyleColor();
 }
 
 int quizzes::random_between(int min, int max) 
