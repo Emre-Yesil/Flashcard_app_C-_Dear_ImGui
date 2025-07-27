@@ -24,7 +24,6 @@ public:
             standart,
             multiple_choice
         };
-
         enum quizType type;
 
         bool timer_on;
@@ -52,6 +51,19 @@ public:
 
     //GAME
     void startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
+    bool quiz_started = false;
+    void draw_multiple_choice_question();
+    void draw_standart_question();
+
+    int random_between(int min, int max);
+
+    struct timerBar{
+        bool running = false;
+        int duration;
+        std::chrono::high_resolution_clock::time_point start_time;
+    };
+    void timer_start(timerBar* timer);
+    void timer_update(timerBar* timer);
 
     //save and load stuffs
     void save_quiz_list_to_file(std::string_view fileName);
@@ -60,7 +72,10 @@ public:
     void save_quiz_to_file(std::string quizName, std::string oldName);
     void load_quiz_from_file(std::string quizName);
 
+    void setQuizDefault(quiz& Q);
+    
     void delete_quiz_file(const std::string fileName);
+
 
     quizzes(/* args */); //constructer  quizzes.addCardToQuiz("Math", {"2+2", "4"});
     ~quizzes(); //deconstructer

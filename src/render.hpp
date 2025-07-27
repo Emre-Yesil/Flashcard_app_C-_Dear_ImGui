@@ -37,7 +37,7 @@ public:
         bool mainFirstFrame = true;
 
     void Draw_Quizlist(float width, float height);
-    bool startQuizOpen = false;
+        bool startQuizOpen = false;
 
     void Draw_top_bar();
 

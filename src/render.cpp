@@ -598,6 +598,7 @@ void WindowClass::setTheme(enum themes e)
     case themes::pink:
         //colors
         //col1 rgb(255, 237, 250) ImVec4(1.0F, 0.92941F, 0.98039F, 1.0F);
+        //ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
         //col2 rgb(255, 184, 224) ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F);
         //darken col2 rgb(255, 140, 205) ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F);
         //col3 rgb(236, 127, 169) ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F);
@@ -606,7 +607,7 @@ void WindowClass::setTheme(enum themes e)
     
         //general
         colors[ImGuiCol_WindowBg] = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
-        colors[ImGuiCol_ChildBg]  = ImVec4(1.0F, 0.92941F, 0.98039F, 1.0F); //col1 rgb(255, 237, 250) 
+        colors[ImGuiCol_ChildBg]  = ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
         colors[ImGuiCol_PopupBg]  = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
         colors[ImGuiCol_Border]   = ImVec4(0.74509F, 0.34901F, 0.52156F, 1.0F); //col4 rgb(190, 89, 133)
 
@@ -619,7 +620,7 @@ void WindowClass::setTheme(enum themes e)
         colors[ImGuiCol_ButtonActive]  =  ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169)  
 
         // Frames
-        colors[ImGuiCol_FrameBg]              = ImVec4(1.0F, 0.92941F, 0.98039F, 1.0F); //rgb(255, 237, 250)
+        colors[ImGuiCol_FrameBg]              = ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
         colors[ImGuiCol_FrameBgHovered]       = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
         colors[ImGuiCol_FrameBgActive]        = ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F); //darken col2 rgb(255, 140, 205) 
 
@@ -637,7 +638,7 @@ void WindowClass::setTheme(enum themes e)
 
         //header
         colors[ImGuiCol_TableHeaderBg]  = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
-        colors[ImGuiCol_Header]         = ImVec4(1.0F, 0.92941F, 0.98039F, 1.0F); //col1 rgb(255, 237, 250)
+        colors[ImGuiCol_Header]         = ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
         colors[ImGuiCol_HeaderHovered]  = ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169)
         colors[ImGuiCol_HeaderActive]   = ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169)
 
