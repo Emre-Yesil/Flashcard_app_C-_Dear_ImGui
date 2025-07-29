@@ -37,51 +37,75 @@ WindowClass window_obj;
 
 int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* giantFont)
 {
-    quizzes::quiz q = Quizzes[Qname];
-    static size_t quiz_size = q.flashcards.size(); 
-    std::vector tmpFlashcards = q.flashcards;
-    std::map<std::string, int> false_answers;
-
-    //set timer
-    static timerBar myTimer;
-    if (!quiz_started)
+    switch (state)
     {
+    case QuizState::NotStarted:
+    {
+        //general setup
+        q = Quizzes[Qname];
+        quiz_size = q.flashcards.size(); 
+
+        //timer
         if (q.timer_on)
             myTimer.duration = (float)q.timer;
         else
             myTimer.duration = 0.0F;
-    }
 
-    ImVec2 buttonSize(width-(2*window_obj.main_padding), height- (5*window_obj.main_padding));
-    ImGui::PushFont(giantFont);
-    ImGui::SetCursorPos(ImVec2(window_obj.main_padding, window_obj.main_padding));
+        //darw start screen
+        ImVec2 buttonSize(width-(2*window_obj.main_padding), height- (5*window_obj.main_padding));
+        ImGui::PushFont(giantFont);
+        ImGui::SetCursorPos(ImVec2(window_obj.main_padding, window_obj.main_padding));
 
-    if(!quiz_started)
-    {
         if(ImGui::Button(("Start Quiz:\n" + Qname).c_str(), buttonSize))
         {
-            quiz_started = true;
-            if(q.type == quizzes::quiz::quizType::standart)
-            {   
-                if(!myTimer.running && myTimer.duration != 0)
-                {
-                    timer_start(&myTimer);
-                }
-            }        
-            else if(q.type == quizzes::quiz::quizType::multiple_choice)
+            state = QuizState::InProgress;
+            if(!myTimer.running && myTimer.duration != 0)
             {
-                if(!myTimer.running && myTimer.duration != 0)
-                {
-                    timer_start(&myTimer);
-                }
+                timer_start(&myTimer);
+            }  
+        }
+        
+        ImGui::PopFont();
+        break;
+    }
+    case QuizState::InProgress:
+    {
+        if (q.timer_on)
+        {
+            int timerStatus = timer_update(&myTimer, width);
+            if (timerStatus == 1)
+            {
+                state = QuizState::Ended;
+                break;
+            }
+
+            if (ImGui::Button("Exit"))
+            {
+                myTimer.running = false;
+                state = QuizState::Ended;
+                break;
             }
         }
-    }
-    ImGui::PopFont();
-    if(timer_update(&myTimer, width) == 1){
-        draw_end_screen();
-    }
+        // Call question rendering functions once per frame
+        if (q.type == quiz::quizType::standart)
+            draw_standart_question();
+        else if (q.type == quiz::quizType::multiple_choice)
+            draw_multiple_choice_question();
 
+        break;
+    }
+    case QuizState::Ended: 
+        draw_end_screen();  // or whatever you use
+        if (ImGui::Button("Quit"))
+        {
+            state = QuizState::NotStarted;
+            return 1;
+        }
+        break;
+
+    default:
+        break;
+    }
     return 0;
 }
 
@@ -96,7 +120,7 @@ void quizzes::draw_standart_question()
 
 void quizzes::draw_end_screen()
 {
-
+    ImGui::Text("quiz is done");
 }
 
 void quizzes::timer_start(timerBar* timer)
@@ -108,7 +132,7 @@ void quizzes::timer_start(timerBar* timer)
 int quizzes::timer_update(timerBar* timer, float width)
 {
     if(!timer->running)
-        return 0;
+        return 1;
     
     auto now = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> elapse = now - timer->start_time;
@@ -116,7 +140,6 @@ int quizzes::timer_update(timerBar* timer, float width)
 
     if(progress >= 1.0F){
         progress = 1.0f;
-        timer->running = false;
         return 1;
     }
 
@@ -124,6 +147,8 @@ int quizzes::timer_update(timerBar* timer, float width)
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram ,window_obj.getColor(WindowClass::colors::green));
     ImGui::ProgressBar(progress, ImVec2(width - 2 * window_obj.popup_padding , 20), label.data());
     ImGui::PopStyleColor();
+
+    return 0;
 }
 
 int quizzes::random_between(int min, int max) 

@@ -92,7 +92,8 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     if(startQuizOpen)
     {
         ImFont* myFont = getFont(fontSize::Giant);
-        quiz_obj.startQuiz(quiz_obj.selected_quiz ,(3*(width-(3*main_padding))/4), height-3*main_padding, myFont);
+        if(quiz_obj.startQuiz(quiz_obj.selected_quiz ,(3*(width-(3*main_padding))/4), height-3*main_padding, myFont) == 1)
+            startQuizOpen = false;
     }
         
 
@@ -307,7 +308,6 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             quiz_obj.Quizzes.erase(Qname);
             quiz_obj.Quizzes[newName] = Q;
             quiz_obj.Quizzes[newName].name = newName;
-
 
             quiz_obj.quizList.erase(std::remove(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), Qname), quiz_obj.quizList.end());
             quiz_obj.quizList.push_back(newName);

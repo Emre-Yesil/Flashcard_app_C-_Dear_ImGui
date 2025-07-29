@@ -20,10 +20,7 @@ public:
 
         int highScore;
 
-        enum quizType{
-            standart,
-            multiple_choice
-        };
+        enum quizType{standart, multiple_choice};
         enum quizType type;
 
         bool timer_on;
@@ -51,14 +48,24 @@ public:
 
     //GAME
     int startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
-    bool quiz_started = false;
+
+    enum class QuizState { NotStarted, InProgress, Ended };
+    QuizState state = QuizState::NotStarted;
+
+    quizzes::quiz q;
+    size_t quiz_size;
+    std::map<std::string, int> false_answers;
+
+    //in progcess
     void draw_multiple_choice_question();
     void draw_standart_question();
 
     void draw_end_screen();
 
+    //random num generator
     int random_between(int min, int max);
 
+    //timer
     struct timerBar{
         bool running = false;
         float duration;
@@ -66,6 +73,7 @@ public:
     };
     void timer_start(timerBar* timer);
     int timer_update(timerBar* timer, float width);
+    timerBar myTimer;
 
     //save and load stuffs
     void save_quiz_list_to_file(std::string_view fileName);
