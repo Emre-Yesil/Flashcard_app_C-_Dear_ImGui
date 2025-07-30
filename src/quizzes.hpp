@@ -59,13 +59,17 @@ public:
     std::map<std::string, int> false_answers;
 
     //in progcess
-    void draw_multiple_choice_question();
-    void draw_standart_question();
+    int draw_multiple_choice_question(size_t question_index, ImFont* giantFont, float* width, float* height);
+    int draw_standart_question(size_t question_index, ImFont* giantFont, float* width, float* height);
+    enum questionState {not_answered ,answered};
+    questionState q_state = not_answered;
+    bool next_question_on = true;
+    size_t question_index;
 
     void draw_end_screen();
 
     //random num generator
-    int random_between(int min, int max);
+    int random_between(size_t min, size_t max);
 
     //timer
     struct timerBar{

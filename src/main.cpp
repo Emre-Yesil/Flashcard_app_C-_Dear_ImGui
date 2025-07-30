@@ -115,6 +115,7 @@ int main(int, char **)
 
     while (!glfwWindowShouldClose(window))
     {
+        //std::cout<<__cplusplus<<"\n";
         start_cycle(); 
         ImGui::NewFrame();
 

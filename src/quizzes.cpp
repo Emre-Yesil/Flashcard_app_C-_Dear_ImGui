@@ -100,12 +100,16 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             }
             ImGui::PopStyleColor(3);
         }
-
+        if(next_question_on)
+        {
+            question_index = random_between(0, quiz_size-1);
+            next_question_on = false;
+        }
         // Call question rendering functions once per frame
         if (q.type == quiz::quizType::standart)
-            draw_standart_question();
+            draw_standart_question(question_index, giantFont, &width, &height);
         else if (q.type == quiz::quizType::multiple_choice)
-            draw_multiple_choice_question();
+            draw_multiple_choice_question(question_index, giantFont, &width, &height);
 
         break;
     }
@@ -115,6 +119,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
         if (ImGui::Button("Quit"))
         {
             state = QuizState::NotStarted;
+            next_question_on = true;
             return 1;
         }
         break;
@@ -125,13 +130,45 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
     return 0;
 }
 
-void quizzes::draw_multiple_choice_question()
+int quizzes::draw_multiple_choice_question(size_t question_index, ImFont* giantFont, float* width, float* height)
 {   
+    switch (q_state)
+    {
+    case not_answered:
+        ImGui::SetCursorPos(ImVec2((*width)/2, (*height)/2));
+        ImGui::PushFont(giantFont);
+        ImGui::Text("%s", q.flashcards[question_index].front_side.data());
+        ImGui::PopFont();
+        break;
 
+    case answered:
+
+        next_question_on = true;
+        break;
+    default:
+        break;
+    }
+    return 0;
 }
-void quizzes::draw_standart_question()
+int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, float* width, float* height)
 {
+    switch (q_state)
+    {
+    case not_answered:
+        ImGui::SetCursorPos(ImVec2((*width)/2, (*height)/2));
+        ImGui::PushFont(giantFont);
+        ImGui::Text("%s", q.flashcards[question_index].front_side.data());
+        ImGui::PopFont();
+        break;
 
+    case answered:
+        /* code */
+        next_question_on = true;
+        break;
+    default:
+        break;
+    }
+    return 0;
 }
 
 void quizzes::draw_end_screen()
@@ -167,7 +204,7 @@ int quizzes::timer_update(timerBar* timer, float width)
     return 0;
 }
 
-int quizzes::random_between(int min, int max) 
+int quizzes::random_between(size_t min, size_t max) 
 {
     static std::mt19937 gen(std::random_device{}());
     std::uniform_int_distribution<> distr(min, max);

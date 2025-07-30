@@ -54,6 +54,7 @@ public:
     void drawQuizSettings(quizzes::quiz& Q);
 
     void drawQuizTable(float width, float height , quizzes::quiz &Q);
+    void cleanUpEmptyFlascards(quizzes::quiz &Q);
 
     void InitFont();
     

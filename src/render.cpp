@@ -164,14 +164,8 @@ void WindowClass::Draw_top_bar()
     {
         if(ImGui::BeginMenu("Quiz"))
         {
-            if(ImGui::MenuItem("New"))
-            { 
-                addQuizPopupOpen = true;
-            }
-            if(ImGui::MenuItem("Save all"))
-            { 
-                
-            }
+            if(ImGui::MenuItem("New")) { addQuizPopupOpen = true;}
+            if(ImGui::MenuItem("Save all")) {     }
             ImGui::EndMenu();
         }
         // UI Menu
@@ -185,13 +179,6 @@ void WindowClass::Draw_top_bar()
                 if (ImGui::MenuItem("Pink"))  setTheme(themes::pink);
 
                 ImGui::EndMenu();
-            }
-            // Font size popup
-            static int font_size = 16; // Make it static so value persists
-
-            if (ImGui::MenuItem("Font Size"))
-            {
-                //slider
             }
             ImGui::EndMenu();
         }
@@ -228,29 +215,18 @@ void WindowClass::drawQuizSettings(quizzes::quiz& Q)
     //punishMentScore 
     ImGui::Checkbox("Punishment Score", &Q.punsih_on);
     
-    if(Q.punsih_on)
-    {
-        ImGui::SliderInt("##punish_slider", &Q.punishmentToScore, 1, 100);
-    }
-    else
-    {
-        Q.punishmentToScore = 0;  // Optional: reset timer if not active
-    }
+    if(Q.punsih_on){ ImGui::SliderInt("##punish_slider", &Q.punishmentToScore, 1, 100); }
+    else { Q.punishmentToScore = 0; }
 
     ImGui::Checkbox("Serial response coefficient", &Q.serial_resposne_open);
     
-    if(Q.serial_resposne_open)
-    {
-        ImGui::SliderFloat("##serial_slider", &Q.serial_response_coefficient, 0, 1);
-    }
-    else
-    {
-        Q.serial_response_coefficient = 0;  // Optional: reset timer if not active
-    }
+    if(Q.serial_resposne_open) { ImGui::SliderFloat("##serial_slider", &Q.serial_response_coefficient, 0, 1); }
+    else { Q.serial_response_coefficient = 0;}
 
     ImGui::Text("False answer repeats: ");
     ImGui::SameLine();
     ImGui::InputInt("##repeat_false", &Q.falseAnswerRepeatTime, 0, 10);
+
     if(Q.falseAnswerRepeatTime > 10)
         Q.falseAnswerRepeatTime = 10;
 
@@ -300,6 +276,10 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             (strcmp(nameLog, Qname.data()) == 0 || 
             std::find(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), std::string(nameLog)) == quiz_obj.quizList.end())) // quiz name cant be same 
         {
+            cleanUpEmptyFlascards(Q);
+            for(auto& card : Q.flashcards)
+                std::cout<<card.front_side<<" "<<card.back_side<<""<<Q.flashcards.size()<<std::endl;
+
             std::string newName = std::string(nameLog);
             quiz_obj.Quizzes[Qname].flashcards.clear();
             quiz_obj.Quizzes.erase(Qname);
@@ -372,8 +352,7 @@ void WindowClass::drawQuizTable(float width, float height , quizzes::quiz &Q)
 {
    constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
 
-    
-    inputCount = Q.flashcards.size();
+    //inputCount = Q.flashcards.size();
 
     if(ImGui::BeginTable("##addtable",2, table_flags))
     {   
@@ -393,24 +372,26 @@ void WindowClass::drawQuizTable(float width, float height , quizzes::quiz &Q)
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
             ImGui::SetNextItemWidth(width / 3);
-            ImGui::InputText(("##frontSide"+ std::to_string(i)).c_str(), card.front_side.data(), 128);
-            //ImGui::InputTextMultiline(("##frontSide"+ std::to_string(i)).c_str(), card.front_side.data(),128, ImVec2(width / 3, ImGui::GetTextLineHeight()));
+            ImGui::InputText(("##frontSide"+ std::to_string(i)).data(), card.front_side.data(), 128);
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(width / 3);
-            ImGui::InputText(("##backSide"+ std::to_string(i)).c_str(), card.back_side.data(), 128); 
+            ImGui::InputText(("##backSide"+ std::to_string(i)).data(), card.back_side.data(), 128); 
             i++;
-        }
-
-        if (!Q.flashcards.empty()) 
-        {
-            auto& last = Q.flashcards.back();
-            if (strlen(last.front_side.data()) > 0 && strlen(last.back_side.data()) > 0) 
-                Q.flashcards.emplace_back();
         }
         ImGui::EndTable();
     } 
-}
+    if (!Q.flashcards.empty()) 
+    {
+        auto& last = Q.flashcards.back();
 
+        // Check if any visible (non-null, non-whitespace) characters exist
+        bool frontNotEmpty = !last.front_side.empty() && std::any_of(last.front_side.begin(), last.front_side.end(), [](char c){ return !std::isspace(c) && c != '\0'; });
+        bool backNotEmpty = !last.back_side.empty() && std::any_of(last.back_side.begin(), last.back_side.end(), [](char c){ return !std::isspace(c) && c != '\0'; });
+
+        if (frontNotEmpty || backNotEmpty)
+            Q.flashcards.emplace_back();
+    }
+}
 
 void WindowClass::addQuiz(float width, float height)
 {
@@ -422,6 +403,7 @@ void WindowClass::addQuiz(float width, float height)
     static char nameLog[32] = "";
 
     static quizzes::quiz Q;
+    //cleanUpEmptyFlascards(Q);
 
     ImGui::SetNextWindowPos(ImVec2(popup_padding, popup_padding));
     ImGui::SetNextWindowSize(ImVec2(width - (2 * popup_padding), height - (2 * popup_padding)));
@@ -494,12 +476,50 @@ void WindowClass::addQuiz(float width, float height)
         ImGui::BeginChild("##addFlashcard_menu", 
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
         
-        //drawAddQuizTable(width, height, front, back);
         drawQuizTable(width, height, Q);
 
         ImGui::EndChild();
         ImGui::EndPopup();
     }
+}
+
+//I dont understand (lamda function)
+/*
+void WindowClass::cleanUpEmptyFlascards(quizzes::quiz &Q)
+{
+    auto is_blank = [](const std::string& s) 
+    {
+        return std::all_of(s.begin(), s.end(), [](unsigned char c) 
+        {
+            return std::isspace(c);
+        });
+    };
+
+    std::erase_if(Q.flashcards, [&](const auto& card) {
+        return is_blank(card.front_side) || is_blank(card.back_side);
+    });
+    
+}
+*/
+
+void WindowClass::cleanUpEmptyFlascards(quizzes::quiz& Q)
+{
+    auto is_blank = [](const std::string& s)
+    {
+        return s.empty() || std::all_of(s.begin(), s.end(), [](unsigned char c)
+        {
+            return std::isspace(c);
+        });
+    };
+
+    Q.flashcards.erase(
+        std::remove_if(Q.flashcards.begin(), Q.flashcards.end(),
+            [&](const flashcard::card& card)
+            {
+                return is_blank(card.front_side) || is_blank(card.back_side);
+            }),
+        Q.flashcards.end()
+    );
 }
 
 void WindowClass::InitFont(){
