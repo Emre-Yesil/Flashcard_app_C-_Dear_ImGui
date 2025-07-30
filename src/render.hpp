@@ -59,10 +59,7 @@ public:
     
     ImFont *getFont(enum class fontSize e);
 
-    enum colors{
-        green,
-        red
-    };
+    enum colors{black ,green, lightGreen, red, darkRed};
     ImVec4 getColor(colors c);
 
     void setTheme(enum themes e);

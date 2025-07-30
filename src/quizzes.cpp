@@ -73,19 +73,34 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
         if (q.timer_on)
         {
             int timerStatus = timer_update(&myTimer, width);
-            if (timerStatus == 1)
-            {
-                state = QuizState::Ended;
-                break;
-            }
-
-            if (ImGui::Button("Exit"))
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
+            ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
+            if (timerStatus == 1 || ImGui::Button("X", ImVec2(30.0F, 30.0F)))
             {
                 myTimer.running = false;
                 state = QuizState::Ended;
+                ImGui::PopStyleColor(3);
                 break;
             }
+            ImGui::PopStyleColor(3);
         }
+        else //timer not on
+        {
+            ImGui::SetCursorPosX(width -  2* window_obj.popup_padding);
+            ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
+            ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
+            if (ImGui::Button("X", ImVec2(30.0F, 30.0F)))
+            {
+                state = QuizState::Ended;
+                ImGui::PopStyleColor(3);
+                break;
+            }
+            ImGui::PopStyleColor(3);
+        }
+
         // Call question rendering functions once per frame
         if (q.type == quiz::quizType::standart)
             draw_standart_question();
@@ -145,7 +160,7 @@ int quizzes::timer_update(timerBar* timer, float width)
 
     std::string label = std::to_string((int)elapse.count()) + "/" + std::to_string((int)timer->duration);
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram ,window_obj.getColor(WindowClass::colors::green));
-    ImGui::ProgressBar(progress, ImVec2(width - 2 * window_obj.popup_padding , 20), label.data());
+    ImGui::ProgressBar(progress, ImVec2(width - 3 * window_obj.popup_padding , 20), label.data());
     ImGui::PopStyleColor();
 
     return 0;
@@ -158,7 +173,7 @@ int quizzes::random_between(int min, int max)
     return distr(gen);
 }
 
-void quizzes::save_quiz_to_file(std::string quizName, std::string oldName)
+int quizzes::save_quiz_to_file(std::string quizName, std::string oldName)
 {
     try{
         std::ofstream out(quizName + ".bin", std::ios::binary);
@@ -166,7 +181,7 @@ void quizzes::save_quiz_to_file(std::string quizName, std::string oldName)
         if(!out || !out.is_open())
         {
             std::cout<<"error at save from file (quiz)\n";
-            return;
+            return 1;
         }
         std::cout<<oldName<<std::endl;
         if(quizName != oldName)
@@ -225,10 +240,10 @@ void quizzes::save_quiz_to_file(std::string quizName, std::string oldName)
         std::cout << "Exception caught while saving quiz: " << e.what() << std::endl;
     }
     
-
+    return 0;
 }
 
-void quizzes::load_quiz_from_file(std::string quizName)
+int quizzes::load_quiz_from_file(std::string quizName)
 {
     try{
         std::ifstream in(quizName + ".bin", std::ios::binary);
@@ -236,7 +251,7 @@ void quizzes::load_quiz_from_file(std::string quizName)
         if(!in || !in.is_open())
         {
             std::cout<<"error at load from file (quiz)\n";
-            return;
+            return 1;
         }
         //name
         size_t nameSize = 0;
@@ -301,16 +316,16 @@ void quizzes::load_quiz_from_file(std::string quizName)
     }catch(const std::exception &e){
         std::cout << "Exception caught while saving quiz: " << e.what() << std::endl;
     }
-    
+    return 0;
 }
 
-void quizzes::save_quiz_list_to_file(std::string_view fileName)
+int quizzes::save_quiz_list_to_file(std::string_view fileName)
 {
     std::ofstream out(std::string(fileName), std::ios::binary);
 
     if(!out || !out.is_open()){
         std::cout<<"error at save from file (quiz list)\n";
-        return;
+        return 1;
     }
 
     size_t list_size = quizList.size();
@@ -324,15 +339,16 @@ void quizzes::save_quiz_list_to_file(std::string_view fileName)
 
         out.write(quiz.data(), name_len);
     }
+    return 0;
 }
 
-void quizzes::load_quiz_list_from_file(std::string_view fileName)
+int quizzes::load_quiz_list_from_file(std::string_view fileName)
 {
     std::ifstream in(std::string(fileName), std::ios::binary);
 
     if(!in || !in.is_open()){
         std::cout<<"error at load from file (quiz list)\n";
-        return;
+        return 1;
     }
 
     size_t list_size = 0;
@@ -359,6 +375,7 @@ void quizzes::load_quiz_list_from_file(std::string_view fileName)
     {
         std::cout<<"quiz name: "<<quiz<<"\n";
     }
+    return 0;
 }
 
 void quizzes::delete_quiz_file(const std::string fileName)

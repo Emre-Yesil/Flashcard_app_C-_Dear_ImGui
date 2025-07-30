@@ -86,11 +86,16 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     ImGui::SameLine();
     //-------------------
 
-    //play menu draw
+    // draw play menu
     ImGui::SetNextWindowPos(ImVec2(width/4 + 5*(main_padding/4), 2* main_padding));
     ImGui::BeginChild("playMenu", ImVec2(3*((width-(3*main_padding))/4), height-(3*main_padding)), childFlags);  
     if(startQuizOpen)
-    {
+    {   if(std::find(quiz_obj.loadedQuizzes.begin(), quiz_obj.loadedQuizzes.end(), 
+            quiz_obj.selected_quiz) == quiz_obj.loadedQuizzes.end())
+        {
+            if(quiz_obj.load_quiz_from_file(quiz_obj.selected_quiz) == 0)
+                quiz_obj.loadedQuizzes.push_back(quiz_obj.selected_quiz);
+        }
         ImFont* myFont = getFont(fontSize::Giant);
         if(quiz_obj.startQuiz(quiz_obj.selected_quiz ,(3*(width-(3*main_padding))/4), height-3*main_padding, myFont) == 1)
             startQuizOpen = false;
@@ -140,12 +145,12 @@ void WindowClass::Draw_Quizlist(float width, float height){
         {
             if(ImGui::MenuItem("start"))
             {
-                quiz_obj.load_quiz_from_file(quiz.data());
+                //quiz_obj.load_quiz_from_file(quiz.data());
                 startQuizOpen = true;
             }
             if(ImGui::MenuItem("edit"))
             {
-                quiz_obj.load_quiz_from_file(quiz.data());
+                //quiz_obj.load_quiz_from_file(quiz.data());
                 editQuizPopupOpen = true;
             }
             if(ImGui::MenuItem("delete"))
@@ -538,8 +543,11 @@ ImVec4 WindowClass::getColor(WindowClass::colors c)
 {
     switch (c)
     {
-    case WindowClass::colors::green: return ImVec4(0.47058F, 0.78431F, 0.25490F, 1.0F); break;
-    case WindowClass::colors::red:   return ImVec4(0.98431F, 0.25490F, 0.25490F, 1.0F); break; 
+    case WindowClass::colors::black:        return ImVec4(0.1F, 0.1F, 0.1F, 1.0F); break;
+    case WindowClass::colors::green:        return ImVec4(0.64313, 0.86666F, 0.0F, 1.0F); break;
+    case WindowClass::colors::lightGreen:   return ImVec4(0.71372F, 0.96078, 0.0F, 1.0F); break;
+    case WindowClass::colors::red:          return ImVec4(0.92941F, 0.16862F, 0.16470F, 1.0F); break; 
+    case  WindowClass::colors::darkRed:     return ImVec4(0.82352F, 0.07450F, 0.07058F, 1.0F); break; 
     default:  break;
     }
 }

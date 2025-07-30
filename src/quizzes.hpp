@@ -42,6 +42,8 @@ public:
 
     std::vector<std::string> quizList;
 
+    std::vector<std::string> loadedQuizzes;
+
     std::map<std::string, struct quiz>Quizzes;
 
     std::string selected_quiz;
@@ -76,11 +78,11 @@ public:
     timerBar myTimer;
 
     //save and load stuffs
-    void save_quiz_list_to_file(std::string_view fileName);
-    void load_quiz_list_from_file(std::string_view fileName);
+    int save_quiz_list_to_file(std::string_view fileName);
+    int load_quiz_list_from_file(std::string_view fileName);
 
-    void save_quiz_to_file(std::string quizName, std::string oldName);
-    void load_quiz_from_file(std::string quizName);
+    int save_quiz_to_file(std::string quizName, std::string oldName);
+    int load_quiz_from_file(std::string quizName);
 
     void setQuizDefault(quiz& Q);
     
