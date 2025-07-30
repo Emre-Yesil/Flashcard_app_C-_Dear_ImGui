@@ -54,6 +54,9 @@ public:
     void drawQuizSettings(quizzes::quiz& Q);
 
     void drawQuizTable(float width, float height , quizzes::quiz &Q);
+
+    bool SafeInputText(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
+
     void cleanUpEmptyFlascards(quizzes::quiz &Q);
 
     void InitFont();
