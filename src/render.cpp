@@ -90,7 +90,8 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     ImGui::SetNextWindowPos(ImVec2(width/4 + 5*(main_padding/4), 2* main_padding));
     ImGui::BeginChild("playMenu", ImVec2(3*((width-(3*main_padding))/4), height-(3*main_padding)), childFlags);  
     if(startQuizOpen)
-    {   if(std::find(quiz_obj.loadedQuizzes.begin(), quiz_obj.loadedQuizzes.end(), 
+    {   
+        if(std::find(quiz_obj.loadedQuizzes.begin(), quiz_obj.loadedQuizzes.end(), 
             quiz_obj.selected_quiz) == quiz_obj.loadedQuizzes.end())
         {
             if(quiz_obj.load_quiz_from_file(quiz_obj.selected_quiz) == 0)
@@ -115,6 +116,12 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
         
     if(editQuizPopupOpen)
     {
+        if(std::find(quiz_obj.loadedQuizzes.begin(), quiz_obj.loadedQuizzes.end(), 
+            quiz_obj.selected_quiz) == quiz_obj.loadedQuizzes.end())
+        {
+            if(quiz_obj.load_quiz_from_file(quiz_obj.selected_quiz) == 0)
+                quiz_obj.loadedQuizzes.push_back(quiz_obj.selected_quiz);
+        }
         ImGui::OpenPopup("##editQuiz");
         editQuiz(quiz_obj.selected_quiz, width, height);
     }
@@ -143,20 +150,9 @@ void WindowClass::Draw_Quizlist(float width, float height){
         }
         if(ImGui::BeginPopupContextItem(uniqueName.c_str()))
         {
-            if(ImGui::MenuItem("start"))
-            {
-                //quiz_obj.load_quiz_from_file(quiz.data());
-                startQuizOpen = true;
-            }
-            if(ImGui::MenuItem("edit"))
-            {
-                //quiz_obj.load_quiz_from_file(quiz.data());
-                editQuizPopupOpen = true;
-            }
-            if(ImGui::MenuItem("delete"))
-            {
-
-            }
+            if(ImGui::MenuItem("start")) { startQuizOpen = true; }
+            if(ImGui::MenuItem("edit"))  { editQuizPopupOpen = true; }
+            if(ImGui::MenuItem("delete")) { }
             ImGui::EndPopup();
         }
     }
@@ -184,18 +180,12 @@ void WindowClass::Draw_top_bar()
             // Theme submenu
             if (ImGui::BeginMenu("Theme"))
             {
-                if (ImGui::MenuItem("Dark"))
-                    setTheme(themes::dark);
-                
-                if (ImGui::MenuItem("Light"))
-                    setTheme(themes::light);
-
-                if (ImGui::MenuItem("Pink"))
-                    setTheme(themes::pink);
+                if (ImGui::MenuItem("Dark"))  setTheme(themes::dark);
+                if (ImGui::MenuItem("Light")) setTheme(themes::light);
+                if (ImGui::MenuItem("Pink"))  setTheme(themes::pink);
 
                 ImGui::EndMenu();
             }
-
             // Font size popup
             static int font_size = 16; // Make it static so value persists
 
@@ -260,7 +250,9 @@ void WindowClass::drawQuizSettings(quizzes::quiz& Q)
 
     ImGui::Text("False answer repeats: ");
     ImGui::SameLine();
-    ImGui::InputInt("##repeat_false", &Q.falseAnswerRepeatTime, 0, 10); //look at it later
+    ImGui::InputInt("##repeat_false", &Q.falseAnswerRepeatTime, 0, 10);
+    if(Q.falseAnswerRepeatTime > 10)
+        Q.falseAnswerRepeatTime = 10;
 
     ImGui::Separator();
 

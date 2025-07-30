@@ -77,7 +77,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
             ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
-            if (timerStatus == 1 || ImGui::Button("X", ImVec2(30.0F, 30.0F)))
+            if (timerStatus == 1 || ImGui::Button("X", ImVec2(28.0F, 28.0F)))
             {
                 myTimer.running = false;
                 state = QuizState::Ended;
@@ -92,7 +92,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
             ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
-            if (ImGui::Button("X", ImVec2(30.0F, 30.0F)))
+            if (ImGui::Button("X", ImVec2(28.0F, 28.0F)))
             {
                 state = QuizState::Ended;
                 ImGui::PopStyleColor(3);
@@ -110,6 +110,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
         break;
     }
     case QuizState::Ended: 
+    {
         draw_end_screen();  // or whatever you use
         if (ImGui::Button("Quit"))
         {
@@ -117,7 +118,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             return 1;
         }
         break;
-
+    }    
     default:
         break;
     }
