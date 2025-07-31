@@ -218,10 +218,10 @@ void WindowClass::drawQuizSettings(quizzes::quiz& Q)
     if(Q.punsih_on){ ImGui::SliderInt("##punish_slider", &Q.punishmentToScore, 1, 100); }
     else { Q.punishmentToScore = 0; }
 
-    ImGui::Checkbox("Serial response coefficient", &Q.serial_resposne_open);
+    ImGui::Checkbox("Serial response coefficient", &Q.serial_true_resposne_open);
     
-    if(Q.serial_resposne_open) { ImGui::SliderFloat("##serial_slider", &Q.serial_response_coefficient, 0, 1); }
-    else { Q.serial_response_coefficient = 0;}
+    if(Q.serial_true_resposne_open) { ImGui::SliderFloat("##serial_slider", &Q.serial_true_response_coefficient, 0, 1); }
+    else { Q.serial_true_response_coefficient = 0;}
 
     ImGui::Text("False answer repeats: ");
     ImGui::SameLine();
@@ -283,7 +283,7 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             std::string newName = std::string(nameLog);
             quiz_obj.Quizzes[Qname].flashcards.clear();
             quiz_obj.Quizzes.erase(Qname);
-            quiz_obj.Quizzes[newName].flashcards = Q.flashcards;
+            quiz_obj.Quizzes[newName] = Q;
             quiz_obj.Quizzes[newName].name = newName;
 
             quiz_obj.quizList.erase(std::remove(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), Qname), quiz_obj.quizList.end());
@@ -552,8 +552,8 @@ void WindowClass::InitFont(){
     // Load the fonts
     smallFont = io.Fonts->AddFontFromFileTTF(fontPath, 12.0F);
     mediumFont = io.Fonts->AddFontFromFileTTF(fontPath, 24.0F);
-    bigFont = io.Fonts->AddFontFromFileTTF(fontPath, 48.0F);
-    giantFont = io.Fonts->AddFontFromFileTTF(fontPath, 58.0F);
+    bigFont = io.Fonts->AddFontFromFileTTF(fontPath, 52.0F);
+    giantFont = io.Fonts->AddFontFromFileTTF(fontPath, 64.0F);
 }
 
 ImFont * WindowClass::getFont(enum class fontSize e)

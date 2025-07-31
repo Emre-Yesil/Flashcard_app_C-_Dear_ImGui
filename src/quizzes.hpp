@@ -29,8 +29,8 @@ public:
         bool punsih_on;
         int punishmentToScore;
 
-        bool serial_resposne_open;
-        float serial_response_coefficient;
+        bool serial_true_resposne_open;
+        float serial_true_response_coefficient;
 
         int falseAnswerRepeatTime;
 
@@ -57,6 +57,7 @@ public:
     quizzes::quiz q;
     size_t quiz_size;
     std::map<std::string, int> false_answers;
+    int current_score = 0;
 
     //in progcess
     int draw_multiple_choice_question(size_t question_index, ImFont* giantFont, float* width, float* height);
