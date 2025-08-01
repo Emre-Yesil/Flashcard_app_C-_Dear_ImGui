@@ -58,6 +58,8 @@ public:
     size_t quiz_size;
     std::map<std::string, int> false_answers;
     int current_score = 0;
+    int serial_true_response = 0;
+    int next_score_increase = 100;
 
     //in progcess
     int draw_multiple_choice_question(size_t question_index, ImFont* giantFont, float* width, float* height);

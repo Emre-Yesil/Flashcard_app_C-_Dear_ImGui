@@ -78,14 +78,28 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
             ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
+            
             if (timerStatus == 2 || ImGui::Button("X", ImVec2(28.0F, 28.0F)) || quiz_size == 0)
             {
-                myTimer.running = false;
-                state = QuizState::Ended;
-                ImGui::PopStyleColor(3);
-                break;
+                ImGui::OpenPopup("##closeStandarQuizT");
             }
             ImGui::PopStyleColor(3);
+
+            if(ImGui::BeginPopup("##closeStandarQuizT"))
+            {
+                ImGui::Text("Are you sure to exit quiz?");
+                if(ImGui::Button("Exit")){
+                    myTimer.running = false;
+                    state = QuizState::Ended;
+                    ImGui::CloseCurrentPopup(); 
+                }
+                ImGui::SameLine();
+                if(ImGui::Button("Cancel")){
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
         }
         else //timer do not on
         {
@@ -95,11 +109,25 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
             if (ImGui::Button("X", ImVec2(28.0F, 28.0F)) || quiz_size == 0)
             {
-                state = QuizState::Ended;
-                ImGui::PopStyleColor(3);
-                break;
+                ImGui::OpenPopup("##closeStandarQuiz");
             }
             ImGui::PopStyleColor(3);
+
+            if(ImGui::BeginPopup("##closeStandarQuiz"))
+            {
+                ImGui::Text("Are you sure to exit quiz?");
+                if(ImGui::Button("Exit")){
+                    state = QuizState::Ended;
+                    ImGui::CloseCurrentPopup(); 
+                }
+                ImGui::SameLine();
+                if(ImGui::Button("Cancel")){
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+            
         }
         if(next_question_on)
         {   
@@ -113,6 +141,8 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
 
         ImGui::Text(("Score : " + std::to_string(current_score)).data());
         ImGui::Text((std::to_string(quiz_size) + " questions remain").data());
+        if(q.serial_true_resposne_open)
+            ImGui::Text((std::to_string(serial_true_response ) + " streak!").data());
 
         if (q.type == quiz::quizType::standart)
             draw_standart_question(question_index, giantFont, &width, &height);
@@ -198,12 +228,18 @@ int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, fl
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::lightGreen));
         if(ImGui::Button("True", ImVec2((*width)/2 - 3* window_obj.popup_padding,  0.0F))) 
         {
-            if(q.serial_true_resposne_open)
-            {
-                
-            }else{
+            if(q.serial_true_resposne_open){
+                if(serial_true_response != 0){
+                    next_score_increase += next_score_increase * q.serial_true_response_coefficient;
+                    current_score += next_score_increase;
+                }else{
+                    current_score += 100; 
+                    serial_true_response++;
+                }      
+            } 
+            else
                 current_score += 100;
-            }
+            
             q.flashcards.at(question_index).front_side.erase();
             q.flashcards.at(question_index).back_side.erase();
             q.flashcards.erase(q.flashcards.begin() + question_index);
@@ -229,6 +265,8 @@ int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, fl
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
         if(ImGui::Button("False", ImVec2((*width)/2 - 3* window_obj.popup_padding,  0.0F)))
         {
+            if(q.serial_true_resposne_open) //streak 
+                serial_true_response = 0;
             if(q.punsih_on)
                 current_score -= q.punishmentToScore;
 

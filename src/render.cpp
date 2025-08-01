@@ -218,9 +218,9 @@ void WindowClass::drawQuizSettings(quizzes::quiz& Q)
     if(Q.punsih_on){ ImGui::SliderInt("##punish_slider", &Q.punishmentToScore, 1, 100); }
     else { Q.punishmentToScore = 0; }
 
-    ImGui::Checkbox("Serial response coefficient", &Q.serial_true_resposne_open);
+    ImGui::Checkbox("Streak score", &Q.serial_true_resposne_open);
     
-    if(Q.serial_true_resposne_open) { ImGui::SliderFloat("##serial_slider", &Q.serial_true_response_coefficient, 0, 1); }
+    if(Q.serial_true_resposne_open) { ImGui::SliderFloat("##serial_slider", &Q.serial_true_response_coefficient, 0, 100, "%.0f%%"); }
     else { Q.serial_true_response_coefficient = 0;}
 
     ImGui::Text("False answer repeats: ");
@@ -233,7 +233,6 @@ void WindowClass::drawQuizSettings(quizzes::quiz& Q)
     ImGui::Separator();
 
 }
-
 
 void WindowClass::editQuiz(std::string Qname, float width, float height) //referance may not nessesery
 {
