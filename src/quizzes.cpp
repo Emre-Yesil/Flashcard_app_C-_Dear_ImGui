@@ -112,7 +112,6 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             ImGui::EndPopup();
         }
         
-
         if(quiz_size == 0){ state = QuizState::Ended; break;}
 
         if(next_question_on && quiz_size != 0)

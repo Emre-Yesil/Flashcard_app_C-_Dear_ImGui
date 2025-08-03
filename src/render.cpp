@@ -600,12 +600,12 @@ void WindowClass::setTheme(enum themes e)
     style.FrameRounding    = 10.0f;
     style.ScrollbarRounding = 10.0f;
     style.ChildRounding = 10.0F;
+    style.PopupRounding = 10.0F;
 
     switch (e)
     {
     case themes::dark:
         ///colors
-        //ImVec4(0.87450F, 0.81568F, 0.72156F, 1.0F); //col1 rgb(223, 208, 184) 
         //ImVec4(0.58039F, 0.53725F, 0.47350F, 1.0F); //col2 rgb(148, 137, 121)
         //ImVec4(0.47058, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96) 
         //ImVec4(0.22352, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70) 
@@ -622,8 +622,8 @@ void WindowClass::setTheme(enum themes e)
         colors[ImGuiCol_Text]   = ImVec4(1.0F, 1.0F, 1.0F, 1.0F); //white 
 
         //button
-        colors[ImGuiCol_Button]        =  ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49))  
-        colors[ImGuiCol_ButtonHovered] =  ImVec4(0.47058F, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96) 
+        colors[ImGuiCol_Button]        =  ImVec4(0.47058F, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96) 
+        colors[ImGuiCol_ButtonHovered] =  ImVec4(0.58039F, 0.53725F, 0.47350F, 1.0F); //col2 rgb(148, 137, 121)
         colors[ImGuiCol_ButtonActive]  =  ImVec4(0.22352F, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70)  
 
         // Frames
@@ -651,59 +651,102 @@ void WindowClass::setTheme(enum themes e)
         break;
     
     case themes::light:
-        /* code */
-        break;
-
-    case themes::pink:
-        //colors
-        //col1 rgb(255, 237, 250) ImVec4(1.0F, 0.92941F, 0.98039F, 1.0F);
-        //ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
-        //col2 rgb(255, 184, 224) ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F);
-        //darken col2 rgb(255, 140, 205) ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F);
-        //col3 rgb(236, 127, 169) ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F);
-        //col4 rgb(190, 89, 133)  ImVec4(0.74509F, 0.34901F, 0.52156F, 1.0F);
-        //darken col4 rgb(120, 47, 79) ImVec4(0.47058F, 0.18431F, 0.30980F, 1.0F);
+    {    //colors
+        ImVec4 col1 = ImVec4(0.98431F, 0.98431F, 0.98431F, 1.0F); //col1 rgb(251, 251, 251) 
+        ImVec4 darkerCol1 = ImVec4(0.91372F, 0.91372F, 0.91372F, 1.0F); //darker col1 rgb(233, 233, 233)
+        ImVec4 col2 = ImVec4(0.90980F, 0.97647F, 1.0F, 1.0F); //col2 rgb(232, 249, 255) 
+        ImVec4 col3 = ImVec4(0.76862F, 0.85098F, 1.0F, 1.0F); //col3 rgb(196, 217, 255) 
+        ImVec4 col4 = ImVec4(0.77254F, 0.72941F, 1.0F, 1.0F); //col4 rgb(197, 186, 255) 
+        ImVec4 col5 = ImVec4(0.09803F, 0.09803F, 0.19607F, 1.0F); //col5 rgb(25, 25, 50)
     
         //general
-        colors[ImGuiCol_WindowBg] = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
-        colors[ImGuiCol_ChildBg]  = ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
-        colors[ImGuiCol_PopupBg]  = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
-        colors[ImGuiCol_Border]   = ImVec4(0.74509F, 0.34901F, 0.52156F, 1.0F); //col4 rgb(190, 89, 133)
+        colors[ImGuiCol_WindowBg] = darkerCol1; //darker col1 rgb(233, 233, 233)
+        colors[ImGuiCol_ChildBg]  = col1; //col1 rgb(251, 251, 251)  
+        colors[ImGuiCol_PopupBg]  = darkerCol1; //darker col1 rgb(233, 233, 233)
+        colors[ImGuiCol_Border]   = col3; //col3 rgb(196, 217, 255) 
 
         //text
-        colors[ImGuiCol_Text]   = ImVec4(0.47058F, 0.18431F, 0.30980F, 1.0F); //darken col4 rgb(120, 47, 79) 
+        colors[ImGuiCol_Text]   = col5; //col5 rgb(25, 25, 50)
 
         //button
-        colors[ImGuiCol_Button]        =  ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F); //darken col2 rgb(255, 140, 205)  
-        colors[ImGuiCol_ButtonHovered] =  ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169) 
-        colors[ImGuiCol_ButtonActive]  =  ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169)  
+        colors[ImGuiCol_Button]        =  col2; //col2 rgb(232, 249, 255)
+        colors[ImGuiCol_ButtonHovered] =  col3; //col3 rgb(196, 217, 255)
+        colors[ImGuiCol_ButtonActive]  =  col2; //col2 rgb(232, 249, 255)  
 
         // Frames
-        colors[ImGuiCol_FrameBg]              = ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
-        colors[ImGuiCol_FrameBgHovered]       = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
-        colors[ImGuiCol_FrameBgActive]        = ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F); //darken col2 rgb(255, 140, 205) 
+        colors[ImGuiCol_FrameBg]              = col1; //col1 rgb(251, 251, 251)  
+        colors[ImGuiCol_FrameBgHovered]       = darkerCol1;  //darker col1 rgb(233, 233, 233)
+        colors[ImGuiCol_FrameBgActive]        = col3; //col3 rgb(196, 217, 255) 
 
         //table
-        colors[ImGuiCol_Tab]        =  ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F);  //col2 rgb(255, 184, 224)
-        colors[ImGuiCol_TabHovered] = ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F);   //darken col2 rgb(255, 140, 205) 
-        colors[ImGuiCol_TabActive]  = ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F);   //darken col2 rgb(255, 140, 205) 
+        colors[ImGuiCol_Tab]        =  col2; //col2 rgb(232, 249, 255)
+        colors[ImGuiCol_TabHovered] = col3; //col3 rgb(196, 217, 255)
+        colors[ImGuiCol_TabActive]  = col3; //col3 rgb(196, 217, 255)
 
         // Scrollbars
-        colors[ImGuiCol_ScrollbarBg]      = ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169) 
-        colors[ImGuiCol_ScrollbarGrab]    = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F);     //col2 rgb(255, 184, 224) 
+        colors[ImGuiCol_ScrollbarBg]      = col2; //col2 rgb(232, 249, 255) 
+        colors[ImGuiCol_ScrollbarGrab]    = col3;  //col3 rgb(196, 217, 255)
 
         //menu bar
-        colors[ImGuiCol_MenuBarBg] = ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169) 
+        colors[ImGuiCol_MenuBarBg] = col4; //col4 rgb(197, 186, 255) 
 
         //header
-        colors[ImGuiCol_TableHeaderBg]  = ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224)
-        colors[ImGuiCol_Header]         = ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
-        colors[ImGuiCol_HeaderHovered]  = ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169)
-        colors[ImGuiCol_HeaderActive]   = ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169)
+        colors[ImGuiCol_TableHeaderBg]  = darkerCol1;  //darker col1 rgb(233, 233, 233)
+        colors[ImGuiCol_Header]         = col1; //col1 rgb(251, 251, 251)  
+        colors[ImGuiCol_HeaderHovered]  = col2; //col2 rgb(232, 249, 255)
+        colors[ImGuiCol_HeaderActive]   = col2; //col2 rgb(232, 249, 255)
 
         break;
-    default:
+    }
+    case themes::pink:
+    {   //colors
+        ImVec4 col1 = ImVec4(1.0F, 0.83137F, 0.95294F, 1.0F); //darker col1 rgb(255, 212, 243) 
+        ImVec4 col2 =ImVec4(1.0F, 0.72156F, 0.87843F, 1.0F); //col2 rgb(255, 184, 224) 
+        ImVec4 darkCol2 = ImVec4(1.0F, 0.54901F, 0.80392F, 1.0F); //darken col2 rgb(255, 140, 205) 
+        ImVec4 col3 =   ImVec4(0.92549F, 0.49803F, 0.66274F, 1.0F); //col3 rgb(236, 127, 169) 
+        ImVec4 col4 = ImVec4(0.74509F, 0.34901F, 0.52156F, 1.0F); //col4 rgb(190, 89, 133)  
+        ImVec4 darkerCol4 = ImVec4(0.47058F, 0.18431F, 0.30980F, 1.0F); //darken col4 rgb(120, 47, 79) 
+    
+        //general
+        colors[ImGuiCol_WindowBg] = col2; //col2 rgb(255, 184, 224)
+        colors[ImGuiCol_ChildBg]  = col1; //darker col1 rgb(255, 212, 243) 
+        colors[ImGuiCol_PopupBg]  = col2; //col2 rgb(255, 184, 224)
+        colors[ImGuiCol_Border]   = col4; //col4 rgb(190, 89, 133)
+
+        //text
+        colors[ImGuiCol_Text]   = darkerCol4; //darken col4 rgb(120, 47, 79) 
+
+        //button
+        colors[ImGuiCol_Button]        =  darkCol2; //darken col2 rgb(255, 140, 205)  
+        colors[ImGuiCol_ButtonHovered] =  col3; //col3 rgb(236, 127, 169) 
+        colors[ImGuiCol_ButtonActive]  =  col3; //col3 rgb(236, 127, 169)  
+
+        // Frames
+        colors[ImGuiCol_FrameBg]            = col1; //darker col1 rgb(255, 212, 243) 
+        colors[ImGuiCol_FrameBgHovered]     = col2; //col2 rgb(255, 184, 224)
+        colors[ImGuiCol_FrameBgActive]      = darkCol2; //darken col2 rgb(255, 140, 205) 
+
+        //table
+        colors[ImGuiCol_Tab]        = col2;         //col2 rgb(255, 184, 224)
+        colors[ImGuiCol_TabHovered] = darkCol2;     //darken col2 rgb(255, 140, 205) 
+        colors[ImGuiCol_TabActive]  = col2;         //darken col2 rgb(255, 140, 205) 
+
+        // Scrollbars
+        colors[ImGuiCol_ScrollbarBg]      = col3; //col3 rgb(236, 127, 169) 
+        colors[ImGuiCol_ScrollbarGrab]    = col2;     //col2 rgb(255, 184, 224) 
+
+        //menu bar
+        colors[ImGuiCol_MenuBarBg] = col3; //col3 rgb(236, 127, 169) 
+
+        //header
+        colors[ImGuiCol_TableHeaderBg]  = col2;; //col2 rgb(255, 184, 224)
+        colors[ImGuiCol_Header]         = col1; //darker col1 rgb(255, 212, 243) 
+        colors[ImGuiCol_HeaderHovered]  = col3; //col3 rgb(236, 127, 169)
+        colors[ImGuiCol_HeaderActive]   = col3; //col3 rgb(236, 127, 169)
+
         break;
+    }
+    default:break;
     }
 }
 
