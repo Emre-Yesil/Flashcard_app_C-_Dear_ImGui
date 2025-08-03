@@ -32,6 +32,10 @@
         |--"save the game setting"
         |--"fast answers to question give more score"
         |--"save high score"
+
+    |--FIX
+        |--streak does not work properly
+        |--timer dont work when it done
 */
 WindowClass window_obj;
 
@@ -77,65 +81,38 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
     }
     case QuizState::InProgress:
     {
-        if (q.timer_on)
+        
+        if(timer_update(&myTimer, width) == 2){state = QuizState::Ended; break;}
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(width -  2* window_obj.popup_padding);
+        ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
+        ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
+        
+        if (ImGui::Button("X", ImVec2(28.0F, 28.0F)))
         {
-            int timerStatus = timer_update(&myTimer, width);
-            ImGui::SameLine();
-            ImGui::SetCursorPosX(width -  2* window_obj.popup_padding);
-            ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
-            ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
-            
-            if (timerStatus == 2 || ImGui::Button("X", ImVec2(28.0F, 28.0F)))
-            {
-                ImGui::OpenPopup("##closeStandarQuizT");
-            }
-            ImGui::PopStyleColor(3);
+            ImGui::OpenPopup("##closeStandarQuizT");
+        }
+        ImGui::PopStyleColor(3);
 
-            if(ImGui::BeginPopup("##closeStandarQuizT"))
-            {
-                ImGui::Text("Are you sure to exit quiz?");
-                if(ImGui::Button("Exit")){
+        if(ImGui::BeginPopup("##closeStandarQuizT"))
+        {
+            ImGui::Text("Are you sure to exit quiz?");
+            if(ImGui::Button("Exit")){
+                if(q.timer_on)
                     myTimer.running = false;
-                    state = QuizState::Ended;
-                    ImGui::CloseCurrentPopup(); 
-                }
-                ImGui::SameLine();
-                if(ImGui::Button("Cancel")){
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::EndPopup();
+                state = QuizState::Ended;
+                ImGui::CloseCurrentPopup(); 
             }
+            ImGui::SameLine();
+            if(ImGui::Button("Cancel")){
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
         }
-        else //timer do not on
-        {
-            ImGui::SetCursorPosX(width -  2* window_obj.popup_padding);
-            ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
-            ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
-            if (ImGui::Button("X", ImVec2(28.0F, 28.0F)) || quiz_size == 0)
-            {
-                ImGui::OpenPopup("##closeStandarQuiz");
-            }
-            ImGui::PopStyleColor(3);
+        
 
-            if(ImGui::BeginPopup("##closeStandarQuiz"))
-            {
-                ImGui::Text("Are you sure to exit quiz?");
-                if(ImGui::Button("Exit")){
-                    state = QuizState::Ended;
-                    ImGui::CloseCurrentPopup(); 
-                }
-                ImGui::SameLine();
-                if(ImGui::Button("Cancel")){
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::EndPopup();
-            }
-            
-        }
         if(quiz_size == 0){ state = QuizState::Ended; break;}
 
         if(next_question_on && quiz_size != 0)
@@ -153,9 +130,9 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             ImGui::Text((std::to_string(serial_true_response ) + " streak!").data());
 
         if (q.type == quiz::quizType::standart)
-            draw_standart_question(question_index, giantFont, &width, &height);
+            draw_standart_question(giantFont, &width, &height);
         else if (q.type == quiz::quizType::multiple_choice)
-            draw_multiple_choice_question(question_index, giantFont, &width, &height);
+            draw_multiple_choice_question(giantFont, &width, &height);
 
         break;
     }
@@ -163,8 +140,9 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
     {
         draw_end_screen();  // or whatever you use
         if (ImGui::Button("Quit"))
-        {
+        {   
             current_score = 0;
+            if(q.serial_true_resposne_open){serial_true_response = 0; next_score_increase = 100.0F;}
             state = QuizState::NotStarted;
             next_question_on = true;
             startQuiz_first_frame = true;
@@ -178,7 +156,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
     return 0;
 }
 
-int quizzes::draw_multiple_choice_question(size_t question_index, ImFont* giantFont, float* width, float* height)
+int quizzes::draw_multiple_choice_question(ImFont* giantFont, float* width, float* height)
 {   
     switch (q_state)
     {
@@ -202,7 +180,7 @@ int quizzes::draw_multiple_choice_question(size_t question_index, ImFont* giantF
     }
     return 0;
 }
-int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, float* width, float* height)
+int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* height)
 {
     switch (q_state)
     {
@@ -240,12 +218,13 @@ int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, fl
             if(q.serial_true_resposne_open)
             {
                 if(serial_true_response != 0){
-                    next_score_increase += next_score_increase * (q.serial_true_response_coefficient/100);
-                    current_score += next_score_increase;
+                    next_score_increase += (next_score_increase * (q.serial_true_response_coefficient/100));
+                    std::cout<<"next question gives score "<<next_score_increase<<"\n";
+                    current_score += (int)next_score_increase;
                 }else{
                     current_score += 100; 
-                    serial_true_response++;
-                }      
+                }
+                serial_true_response++;      
             } 
             else
                 current_score += 100;

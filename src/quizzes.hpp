@@ -50,7 +50,7 @@ public:
 
     //GAME
     int startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
-    bool startQuiz_first_frame = true;
+        bool startQuiz_first_frame = true;
 
     enum class QuizState { NotStarted, InProgress, Ended };
     QuizState state = QuizState::NotStarted;
@@ -61,11 +61,11 @@ public:
 
     int current_score = 0;
     int serial_true_response = 0;
-    int next_score_increase = 100;
+    float next_score_increase = 100;
 
     //in progcess
-    int draw_multiple_choice_question(size_t question_index, ImFont* giantFont, float* width, float* height);
-    int draw_standart_question(size_t question_index, ImFont* giantFont, float* width, float* height);
+    int draw_multiple_choice_question(ImFont* giantFont, float* width, float* height);
+    int draw_standart_question(ImFont* giantFont, float* width, float* height);
     enum questionState {not_answered ,answered};
     questionState q_state = not_answered;
     bool next_question_on = true;

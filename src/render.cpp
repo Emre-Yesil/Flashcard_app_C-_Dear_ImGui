@@ -30,9 +30,9 @@
         |   |--addQuiz(DONE)
         |   |   |--drawAddTable(DONE)
         |   |   |--save_to_file(DONE)
-        |   |--Ui setting menu(NOT DONE)
+        |   |--Ui setting menu(DONE)
         |   |   |--change theme (DONE)
-        |   |   |--slider(NOT STARTED) "alos need to edit init font function"
+        |   |   |--slider(Canceled) "alos need to edit init font function"
         |
         |--QuizMenu(DONE)
         |   |--drawQuizList(DONE)
@@ -41,7 +41,7 @@
         |--editQuiz(IMMPROVABLE)
         |   |--drawEditQuizTable(DONE)
         |   |--"error at cancel button(DONE) Do not use copilot again!"
-        |   |--"quiz settings"(NOT DONE)
+        |   |--"quiz settings"(DONE)
         |   |--ERRROR when create empty quiz cant be add any flashcard (FIXED)
         |--addQuiz
         |   |--make the addQuiz like edit quiz for better desing(DONE)
@@ -129,32 +129,49 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
         
 }
 
-void WindowClass::Draw_Quizlist(float width, float height){
+void WindowClass::Draw_Quizlist(float width, float height) {
+    static std::string quiz_to_delete;
+    static bool open_delete_popup = false;
 
-    if(quiz_obj.quizList.empty())
-    {
+    if (quiz_obj.quizList.empty()) {
         ImGui::Selectable("Empty", false);
         return;
     }
-        
-    for(const auto &quiz : quiz_obj.quizList)
-    {   
-        if(ImGui::Selectable(quiz.data(), quiz_obj.selected_quiz == quiz.data()))
-        {
+
+    for (const auto& quiz : quiz_obj.quizList) {
+        if (ImGui::Selectable(quiz.data(), quiz_obj.selected_quiz == quiz.data())) {
             quiz_obj.selected_quiz = quiz.data();
         }
-        std::string uniqueName= "##quizContexMenu" + quiz;
-        if(ImGui::IsItemFocused() &&ImGui::IsItemClicked(ImGuiMouseButton_Right))
-        {
+        std::string uniqueName = "##quizContexMenu" + quiz;
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
             ImGui::OpenPopup(uniqueName.c_str());
         }
-        if(ImGui::BeginPopupContextItem(uniqueName.c_str()))
-        {
-            if(ImGui::MenuItem("start")) { startQuizOpen = true; }
-            if(ImGui::MenuItem("edit"))  { editQuizPopupOpen = true; }
-            if(ImGui::MenuItem("delete")) { }
+        if (ImGui::BeginPopup(uniqueName.c_str())) {
+            if (ImGui::MenuItem("start")) { startQuizOpen = true; }
+            if (ImGui::MenuItem("edit")) { editQuizPopupOpen = true; }
+            if (ImGui::MenuItem("delete")) {open_delete_popup = true;  quiz_to_delete = quiz;}
             ImGui::EndPopup();
         }
+    }
+    if(open_delete_popup){ImGui::OpenPopup("##delete_Quiz_ensurance"); open_delete_popup = false;}
+
+    // Delete confirmation popup (always available)
+    if (ImGui::BeginPopup("##delete_Quiz_ensurance")) {
+        ImGui::Text("Are you sure to delete %s?", quiz_to_delete.c_str());
+        if (ImGui::Button("Delete permanently")) {
+            quiz_obj.delete_quiz_file(quiz_to_delete);
+            quiz_obj.quizList.erase(std::remove_if(quiz_obj.quizList.begin(), quiz_obj.quizList.end(),
+                [&](const std::string& s) { return s == quiz_to_delete; }), quiz_obj.quizList.end());
+            quiz_obj.save_quiz_list_to_file(quiz_obj.quizListFile);
+            quiz_to_delete.clear();
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) {
+            quiz_to_delete.clear();
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 }
 
@@ -203,14 +220,8 @@ void WindowClass::drawQuizSettings(quizzes::quiz& Q)
     //timer
     ImGui::Checkbox("Timer (second)", &Q.timer_on);
     
-    if(Q.timer_on)
-    {
-        ImGui::SliderInt("##timer_slider", &Q.timer, 1, 60);
-    }
-    else
-    {
-        Q.timer = 0;  // Optional: reset timer if not active
-    }
+    if(Q.timer_on) { ImGui::SliderInt("##timer_slider", &Q.timer, 1, 60); }
+    else{ Q.timer = 0; }  // Optional: reset timer if not active
 
     //punishMentScore 
     ImGui::Checkbox("Punishment Score", &Q.punsih_on);
@@ -227,8 +238,7 @@ void WindowClass::drawQuizSettings(quizzes::quiz& Q)
     ImGui::SameLine();
     ImGui::InputInt("##repeat_false", &Q.falseAnswerRepeatTime, 0, 10);
 
-    if(Q.falseAnswerRepeatTime > 10)
-        Q.falseAnswerRepeatTime = 10;
+    if(Q.falseAnswerRepeatTime > 10) Q.falseAnswerRepeatTime = 10;
 
     ImGui::Separator();
 
