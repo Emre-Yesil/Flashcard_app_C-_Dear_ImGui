@@ -18,4 +18,3 @@ public:
     flashcard(/* args */);
     ~flashcard();
 };
-

@@ -50,6 +50,7 @@ public:
 
     //GAME
     int startQuiz(std::string Qname, float width, float height, ImFont* giantFont);
+    bool startQuiz_first_frame = true;
 
     enum class QuizState { NotStarted, InProgress, Ended };
     QuizState state = QuizState::NotStarted;
@@ -57,6 +58,7 @@ public:
     quizzes::quiz q;
     size_t quiz_size;
     std::map<std::string, int> false_answers;
+
     int current_score = 0;
     int serial_true_response = 0;
     int next_score_increase = 100;
@@ -99,4 +101,3 @@ public:
     quizzes(/* args */); //constructer  quizzes.addCardToQuiz("Math", {"2+2", "4"});
     ~quizzes(); //deconstructer
 };
-

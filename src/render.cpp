@@ -442,6 +442,7 @@ void WindowClass::addQuiz(float width, float height)
         if(ImGui::Button("Save") && strlen(nameLog) > 0 && 
             std::find(quiz_obj.quizList.begin(), quiz_obj.quizList.end(), std::string(nameLog)) == quiz_obj.quizList.end())
         {
+            cleanUpEmptyFlascards(Q_add);
             std::string name = std::string(nameLog);
             quiz_obj.quizList.push_back(name);
             quiz_obj.Quizzes[name];
@@ -536,8 +537,7 @@ void WindowClass::cleanUpEmptyFlascards(quizzes::quiz& Q)
                 return is_blank(card.front_side) || is_blank(card.back_side);
             }),
         Q.flashcards.end()
-    );
-    
+    );  
 }
 
 void WindowClass::InitFont(){

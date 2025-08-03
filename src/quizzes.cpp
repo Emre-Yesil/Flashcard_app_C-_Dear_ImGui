@@ -42,14 +42,21 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
     case QuizState::NotStarted:
     {
         //general setup
-        q = Quizzes[Qname];
-        quiz_size = q.flashcards.size(); 
+        if(startQuiz_first_frame)
+        {
+            std::cout<<"1\n";
+            q = Quizzes[Qname];
+            quiz_size = q.flashcards.size(); 
+            std::cout<<"size- "<<quiz_size<<" -size"<<std::endl;
+            for(auto& card : q.flashcards) std::cout<<card.front_side<<std::endl;
 
-        //timer
-        if (q.timer_on)
-            myTimer.duration = (float)q.timer;
-        else
-            myTimer.duration = 0.0F;
+            //timer
+            if (q.timer_on)
+                myTimer.duration = (float)q.timer;
+            else
+                myTimer.duration = 0.0F;
+            startQuiz_first_frame = false;
+        }
 
         //darw start screen
         ImVec2 buttonSize(width-(2*window_obj.main_padding), height- (5*window_obj.main_padding));
@@ -79,7 +86,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
             ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
             
-            if (timerStatus == 2 || ImGui::Button("X", ImVec2(28.0F, 28.0F)) || quiz_size == 0)
+            if (timerStatus == 2 || ImGui::Button("X", ImVec2(28.0F, 28.0F)))
             {
                 ImGui::OpenPopup("##closeStandarQuizT");
             }
@@ -129,10 +136,11 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             }
             
         }
-        if(next_question_on)
+        if(quiz_size == 0){ state = QuizState::Ended; break;}
+
+        if(next_question_on && quiz_size != 0)
         {   
-            if(q.timer_on)
-                timer_start(&myTimer);
+            if(q.timer_on) timer_start(&myTimer);
 
             question_index = random_between(0, quiz_size - 1);
             next_question_on = false;
@@ -159,6 +167,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             current_score = 0;
             state = QuizState::NotStarted;
             next_question_on = true;
+            startQuiz_first_frame = true;
             return 1;
         }
         break;
@@ -228,9 +237,10 @@ int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, fl
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::lightGreen));
         if(ImGui::Button("True", ImVec2((*width)/2 - 3* window_obj.popup_padding,  0.0F))) 
         {
-            if(q.serial_true_resposne_open){
+            if(q.serial_true_resposne_open)
+            {
                 if(serial_true_response != 0){
-                    next_score_increase += next_score_increase * q.serial_true_response_coefficient;
+                    next_score_increase += next_score_increase * (q.serial_true_response_coefficient/100);
                     current_score += next_score_increase;
                 }else{
                     current_score += 100; 
@@ -255,6 +265,8 @@ int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, fl
 
             if(q.timer_on)
                 myTimer.running = true;
+
+            std::cout<<"end of true button\n";
         }
         ImGui::PopStyleColor(3);
 
@@ -301,6 +313,8 @@ int quizzes::draw_standart_question(size_t question_index, ImFont* giantFont, fl
 
             if(q.timer_on)
                 myTimer.running = true;
+
+            std::cout<<"end of false button\n";
         }
         ImGui::PopStyleColor(3);
 
@@ -349,8 +363,10 @@ int quizzes::timer_update(timerBar* timer, float width)
 
 int quizzes::random_between(size_t min, size_t max) 
 {
+    std::cout << min << " > " << max << ")\n";
+        
     static std::mt19937 gen(std::random_device{}());
-    std::uniform_int_distribution<> distr(min, max);
+    std::uniform_int_distribution<> distr(static_cast<int>(min), static_cast<int>(max));
     return distr(gen);
 }
 
@@ -574,7 +590,6 @@ quizzes::quizzes()
 {
 
 }
-
 quizzes::~quizzes()
 {
     quizList.clear();
