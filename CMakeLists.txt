@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/quizzes.cpp
     src/render.cpp
+    src/resources/resource.rc
 )
 
 add_custom_target(iwyu
