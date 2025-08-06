@@ -55,17 +55,13 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             actual_size = q.flashcards.size();
             remain_question = q.flashcards.size();
 
-            std::cout<<"size- "<<quiz_size<<" -size"<<std::endl;
-            for(auto& card : q.flashcards) std::cout<<card.front_side<<std::endl;
-
             //timer
             if (q.timer_on)
                 myTimer.duration = (float)q.timer;
             else
                 myTimer.duration = 0.0F;
-            startQuiz_first_frame = false;
 
-            std::cout<<"duracation- "<<myTimer.duration<<std::endl;
+            startQuiz_first_frame = false;
         }
         //darw start screen
         ImVec2 buttonSize(width-(2*window_obj.main_padding), height- (5*window_obj.main_padding));
@@ -146,7 +142,6 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
 
 
             next_question_on = false;
-            std::cout <<"next question- size:"<<quiz_size<<" index: "<<question_index<<std::endl;
         }
 
         if(q.type == quiz::quizType::multiple_choice && actual_size < 4)
@@ -172,7 +167,7 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
     }
     case QuizState::Ended: 
     {
-        draw_end_screen();  // or whatever you use
+        draw_end_screen(&width, giantFont);  // or whatever you use
         if (ImGui::Button("Quit"))
         {   
             current_score = 0;
@@ -296,9 +291,6 @@ int quizzes::draw_multiple_choice_question(ImFont* giantFont, float* width, floa
             q_state = questionState::not_answered;
             next_question_on = true;
             
-            for(auto card : q.flashcards){
-                std::cout<<"front "<<card.front_side<<" back "<<card.back_side<<std::endl;
-            }
         }
         break;
     }
@@ -321,7 +313,6 @@ void quizzes::set_choices(std::string Qname)
         if(choices[true_choice_index].Card.back_side != Quizzes[Qname].flashcards.at(index).back_side)
             question_index_from_flashcards.insert(index);
     }
-    std::cout<<"in set choice 1\n";
     std::vector<int> indices(question_index_from_flashcards.begin(), question_index_from_flashcards.end());
 
     int e = 0;
@@ -331,10 +322,8 @@ void quizzes::set_choices(std::string Qname)
 
         choices[e].is_true = false;
         choices[e].Card = Quizzes[Qname].flashcards.at(idx);
-        std::cout << "choice: " << Quizzes[Qname].flashcards.at(idx).back_side << std::endl;
         e++;
     }
-    std::cout<<"in set choice 2\n";
 }
 int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* height)
 {
@@ -373,35 +362,9 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
         {
             update_question_arr(true);
             update_score(true);
-            /*
-            if(q.serial_true_resposne_open)
-            {
-                if(serial_true_response != 0){
-                    next_score_increase += (next_score_increase * (q.serial_true_response_coefficient/100));
-                    std::cout<<"next question gives score "<<next_score_increase<<"\n";
-                    current_score += (int)next_score_increase;
-                }else{
-                    current_score += 100; 
-                }
-                serial_true_response++;      
-            } 
-            else
-                current_score += 100;
             
-            q.flashcards.at(question_index).front_side.erase();
-            q.flashcards.at(question_index).back_side.erase();
-            q.flashcards.erase(q.flashcards.begin() + question_index);
-            quiz_size--;
-            */
-            //------------
-            for(auto& card : q.flashcards)
-                std::cout<<card.front_side<<" "<<card.back_side<<std::endl;
-            //------------
-
             q_state = questionState::not_answered;
             next_question_on = true; 
-
-            std::cout<<"end of true button\n";
         }
         ImGui::PopStyleColor(3);
 
@@ -414,43 +377,9 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
         {   
             update_question_arr(false);
             update_score(false);
-            /*
-            if(q.serial_true_resposne_open) //streak 
-                serial_true_response = 0;
-            if(q.punsih_on)
-                current_score -= q.punishmentToScore;
-            */
-            /*
-            if(q.falseAnswerRepeatTime != 0)
-            {
-                if(false_answers.contains(q.flashcards.at(question_index).front_side))
-                {
-                    //exsist  
-                    false_answers[q.flashcards.at(question_index).front_side]++;
-                }else
-                {
-                    //not exsist
-                    false_answers[q.flashcards.at(question_index).front_side] = 0;
-                }
-                //repeat enought time
-                if(false_answers[q.flashcards.at(question_index).front_side] == q.falseAnswerRepeatTime)
-                {
-                    q.flashcards.at(question_index).front_side.erase();
-                    q.flashcards.at(question_index).back_side.erase();
-                    q.flashcards.erase(q.flashcards.begin() + question_index);
-                    quiz_size--;
-                }
-            }else{
-                q.flashcards.at(question_index).front_side.erase();
-                q.flashcards.at(question_index).back_side.erase();
-                q.flashcards.erase(q.flashcards.begin() + question_index);
-                quiz_size--;
-            }*/
 
             q_state = questionState::not_answered;
             next_question_on = true;
-
-            std::cout<<"end of false button\n";
         }
         ImGui::PopStyleColor(3);
 
@@ -512,8 +441,7 @@ void quizzes::update_question_arr(bool conditation)
     break; 
     }
     
-    default:
-        break;
+    default: break;
     }   
 }
 
@@ -527,7 +455,6 @@ void quizzes::update_score(bool conditation)
         {
             if(serial_true_response != 0){
                 next_score_increase += (next_score_increase * (q.serial_true_response_coefficient/100));
-                std::cout<<"next question gives score "<<next_score_increase<<"\n";
                 current_score += (int)next_score_increase;
             }else{
                 current_score += 100; 
@@ -546,13 +473,21 @@ void quizzes::update_score(bool conditation)
             current_score -= q.punishmentToScore;
         break;
     }
-    default:
-        break;
+    default: break;
     }
 }
-void quizzes::draw_end_screen()
-{
-    ImGui::Text("quiz is done");
+void quizzes::draw_end_screen(float *width, ImFont *myFont)
+{   
+    ImGui::PushFont(myFont);
+
+    //score
+    ImVec2 score_size = ImGui::CalcTextSize(("YOUR SCORE : " + std::to_string(current_score)).c_str());
+    ImGui::SetCursorPos( ImVec2((*width - score_size.x) / 2, window_obj.popup_padding));
+    ImGui::Text(("TOTAL SCORE : " + std::to_string(current_score)).c_str());
+
+    //
+
+    ImGui::PopFont();
 }
 
 void quizzes::timer_start(timerBar* timer)
@@ -565,7 +500,6 @@ int quizzes::timer_update(timerBar* timer, float width)
 {
     if(!timer->running)
         return 1;
-    
 
     auto now = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> elapse = now - timer->start_time;
@@ -573,7 +507,6 @@ int quizzes::timer_update(timerBar* timer, float width)
 
     if(progress >= 1.0F){
         progress = 1.0f;
-        std::cout<<elapse.count()<<" elapsed\n";
         return 2;
     }
 
@@ -586,9 +519,7 @@ int quizzes::timer_update(timerBar* timer, float width)
 }
 
 int quizzes::random_between(size_t min, size_t max) 
-{
-    //std::cout << min << " > " << max << ")\n";
-        
+{       
     static std::mt19937 gen(std::random_device{}());
     std::uniform_int_distribution<> distr(static_cast<int>(min), static_cast<int>(max));
     return distr(gen);
@@ -604,7 +535,6 @@ int quizzes::save_quiz_to_file(std::string quizName, std::string oldName)
             std::cout<<"error at save from file (quiz)\n";
             return 1;
         }
-        std::cout<<oldName<<std::endl;
         if(quizName != oldName)
             std::filesystem::remove(oldName + ".bin");
         
@@ -612,9 +542,6 @@ int quizzes::save_quiz_to_file(std::string quizName, std::string oldName)
         size_t nameSize = quizName.length();
         out.write(reinterpret_cast<const char*>(&nameSize), sizeof(nameSize));
         out.write(quizName.data(), nameSize);
-
-        //high score
-        out.write(reinterpret_cast<const char*>(&Quizzes[quizName].highScore), sizeof(Quizzes[quizName].highScore));
         
         //quiz type
         short int quizType;
@@ -681,9 +608,6 @@ int quizzes::load_quiz_from_file(std::string quizName)
         name.resize(nameSize);
         in.read(name.data(), nameSize);
         Quizzes[name].name = name;
-
-        //high score
-        in.read(reinterpret_cast<char*>(&Quizzes[name].highScore), sizeof(Quizzes[name].highScore));
 
         //quiz type
         short int quizType;
@@ -775,7 +699,6 @@ int quizzes::load_quiz_list_from_file(std::string_view fileName)
     size_t list_size = 0;
 
     in.read(reinterpret_cast<char *>(&list_size), sizeof(list_size));
-    std::cout<<"quiz list size: "<<list_size<<"\n";
 
     quizList.clear();
     quizList.reserve(list_size); // reserve memory to avoid reallocation
@@ -791,10 +714,6 @@ int quizzes::load_quiz_list_from_file(std::string_view fileName)
         in.read(quizName.data(), static_cast<std::streamsize>(name_len));
 
         quizList.push_back(quizName);
-    }
-    for(const auto &quiz : quizList)
-    {
-        std::cout<<"quiz name: "<<quiz<<"\n";
     }
     return 0;
 }

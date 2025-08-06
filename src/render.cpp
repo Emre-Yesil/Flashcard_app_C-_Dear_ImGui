@@ -78,7 +78,7 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
     ImGui::SetNextWindowPos(ImVec2(main_padding, 2 * main_padding));
     ImGui::BeginChild("quizMenu", ImVec2((width - (3*main_padding))/4 , height - (3*main_padding)), childFlags);
 
-    Draw_Quizlist(width, height);
+    Draw_Quizlist();
         
     ImGui::EndChild();
 
@@ -129,7 +129,7 @@ void WindowClass::Draw(std::string_view label, const float width, const float he
         
 }
 
-void WindowClass::Draw_Quizlist(float width, float height) {
+void WindowClass::Draw_Quizlist() {
     static std::string quiz_to_delete;
     static bool open_delete_popup = false;
 
@@ -182,7 +182,6 @@ void WindowClass::Draw_top_bar()
         if(ImGui::BeginMenu("Quiz"))
         {
             if(ImGui::MenuItem("New")) { addQuizPopupOpen = true;}
-            if(ImGui::MenuItem("Save all")) {     }
             ImGui::EndMenu();
         }
         // UI Menu
@@ -350,14 +349,14 @@ void WindowClass::editQuiz(std::string Qname, float width, float height) //refer
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
         
 
-        drawQuizTable(width, height, Q);
+        drawQuizTable(width, Q);
         
         ImGui::EndChild();
         ImGui::EndPopup();
     }
 }
 
-void WindowClass::drawQuizTable(float width, float height, quizzes::quiz& Q)
+void WindowClass::drawQuizTable(float width, quizzes::quiz& Q)
 {
     constexpr static auto table_flags = ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
 
@@ -507,7 +506,7 @@ void WindowClass::addQuiz(float width, float height)
         ImGui::BeginChild("##addFlashcard_menu", 
             ImVec2((3 * (width/4)) - (3 * popup_padding), (3*(height/4)) -  popup_padding), childFlags);
         
-        drawQuizTable(width, height, Q_add);
+        drawQuizTable(width, Q_add);
 
         ImGui::EndChild();
         ImGui::EndPopup();
@@ -557,12 +556,25 @@ void WindowClass::InitFont(){
     char fontPath[MAX_PATH];
     SHGetFolderPathA(nullptr, CSIDL_FONTS, nullptr, 0, fontPath);
     strcat_s(fontPath, "\\arial.ttf");  // Use Arial as the default font
+    
+    static const ImWchar turkish_range[] = {
+        0x0020, 0x00FF, // Latin-1 Supplement
+        0x011E, 0x011F, // Ğ ğ
+        0x0130, 0x0131, // İ ı
+        0x015E, 0x015F, // Ş ş
+        0,
+    };
 
-    // Load the fonts
-    smallFont = io.Fonts->AddFontFromFileTTF(fontPath, 12.0F);
-    mediumFont = io.Fonts->AddFontFromFileTTF(fontPath, 24.0F);
-    bigFont = io.Fonts->AddFontFromFileTTF(fontPath, 52.0F);
-    giantFont = io.Fonts->AddFontFromFileTTF(fontPath, 64.0F);
+    ImFontConfig config;
+    config.OversampleH = 3;
+    config.OversampleV = 1;
+    config.PixelSnapH = true;
+
+    // Fontları Türkçe karakterlerle yükle
+    smallFont = io.Fonts->AddFontFromFileTTF(fontPath, 12.0F, &config, turkish_range);
+    mediumFont = io.Fonts->AddFontFromFileTTF(fontPath, 24.0F, &config, turkish_range);
+    bigFont = io.Fonts->AddFontFromFileTTF(fontPath, 52.0F, &config, turkish_range);
+    giantFont = io.Fonts->AddFontFromFileTTF(fontPath, 64.0F, &config, turkish_range);
 }
 
 ImFont * WindowClass::getFont(enum class fontSize e)
@@ -578,7 +590,6 @@ ImFont * WindowClass::getFont(enum class fontSize e)
     }
 }
 
-
 ImVec4 WindowClass::getColor(WindowClass::colors c)
 {
     switch (c)
@@ -588,7 +599,7 @@ ImVec4 WindowClass::getColor(WindowClass::colors c)
     case WindowClass::colors::lightGreen:   return ImVec4(0.71372F, 0.96078F, 0.0F, 1.0F); break;
     case WindowClass::colors::red:          return ImVec4(0.92941F, 0.16862F, 0.16470F, 1.0F); break; 
     case  WindowClass::colors::darkRed:     return ImVec4(0.82352F, 0.07450F, 0.07058F, 1.0F); break; 
-    default:  break;
+    default: ImVec4(0.0F, 0.0F, 0.0F ,0.0F); break;
     }
 }
 
@@ -605,51 +616,51 @@ void WindowClass::setTheme(enum themes e)
     switch (e)
     {
     case themes::dark:
-        ///colors
-        //ImVec4(0.58039F, 0.53725F, 0.47350F, 1.0F); //col2 rgb(148, 137, 121)
-        //ImVec4(0.47058, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96) 
-        //ImVec4(0.22352, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70) 
-        //ImVec4(0.13333, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49))  
-        //ImVec4(1.0F, 1.0F, 1.0F, 1.0F); //white rgb(255, 255, 255)
+    {    ///colors
+        ImVec4 col1 = ImVec4(0.58039F, 0.53725F, 0.47350F, 1.0F); //col1 rgb(148, 137, 121)
+        ImVec4 col2 = ImVec4(0.47058F, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96) 
+        ImVec4 col3 = ImVec4(0.22352F, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70) 
+        ImVec4 col4 = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49))  
+        ImVec4 col5 = ImVec4(1.0F, 1.0F, 1.0F, 1.0F); //white rgb(255, 255, 255)
     
         //general
-        colors[ImGuiCol_WindowBg] = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49))
-        colors[ImGuiCol_ChildBg]  = ImVec4(0.22352F, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70)  
-        colors[ImGuiCol_PopupBg]  = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49))
-        colors[ImGuiCol_Border]   = ImVec4(0.58039F, 0.53725F, 0.47350F, 1.0F); //col2 rgb(148, 137, 121)
+        colors[ImGuiCol_WindowBg] = col4; //col4 rgb(34, 40, 49))
+        colors[ImGuiCol_ChildBg]  = col3; //col3 rgb(57, 62, 70)  
+        colors[ImGuiCol_PopupBg]  = col4; //col4 rgb(34, 40, 49))
+        colors[ImGuiCol_Border]   = col1; //col1 rgb(148, 137, 121)
 
         //text
-        colors[ImGuiCol_Text]   = ImVec4(1.0F, 1.0F, 1.0F, 1.0F); //white 
+        colors[ImGuiCol_Text]   = col5; //white 
 
         //button
-        colors[ImGuiCol_Button]        =  ImVec4(0.47058F, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96) 
-        colors[ImGuiCol_ButtonHovered] =  ImVec4(0.58039F, 0.53725F, 0.47350F, 1.0F); //col2 rgb(148, 137, 121)
-        colors[ImGuiCol_ButtonActive]  =  ImVec4(0.22352F, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70)  
+        colors[ImGuiCol_Button]        =  col2; //darken col2 rgb(120, 110, 96) 
+        colors[ImGuiCol_ButtonHovered] =  col1; //col1 rgb(148, 137, 121)
+        colors[ImGuiCol_ButtonActive]  =  col3; //col3 rgb(57, 62, 70)  
 
         // Frames
-        colors[ImGuiCol_FrameBg]              = ImVec4(0.22352F, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70)
-        colors[ImGuiCol_FrameBgHovered]       = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49))
-        colors[ImGuiCol_FrameBgActive]        = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49)) 
+        colors[ImGuiCol_FrameBg]              = col3; //col3 rgb(57, 62, 70)
+        colors[ImGuiCol_FrameBgHovered]       = col4; //col4 rgb(34, 40, 49))
+        colors[ImGuiCol_FrameBgActive]        = col4; //col4 rgb(34, 40, 49)) 
 
         //table
-        colors[ImGuiCol_Tab]        =  ImVec4(0.22352F, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70)
-        colors[ImGuiCol_TabHovered] = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49)) 
-        colors[ImGuiCol_TabActive]  = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49)) 
+        colors[ImGuiCol_Tab]        =  col3; //col3 rgb(57, 62, 70)
+        colors[ImGuiCol_TabHovered] = col4; //col4 rgb(34, 40, 49)) 
+        colors[ImGuiCol_TabActive]  = col4; //col4 rgb(34, 40, 49)) 
 
         // Scrollbars
-        colors[ImGuiCol_ScrollbarBg]      = ImVec4(0.87450F, 0.81568F, 0.72156F, 1.0F); //col1 rgb(223, 208, 184) 
-        colors[ImGuiCol_ScrollbarGrab]    = ImVec4(0.58039F, 0.53725F, 0.47350F, 1.0F); //col2 rgb(148, 137, 121) 
+        colors[ImGuiCol_ScrollbarBg]      = col1;; //col1 rgb(148, 137, 121) 
+        colors[ImGuiCol_ScrollbarGrab]    = col4; //col4 rgb(34, 40, 49))
 
         //menu bar
-        colors[ImGuiCol_MenuBarBg] = ImVec4(0.47058F, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96) 
+        colors[ImGuiCol_MenuBarBg] = col2; //darken col1 rgb(120, 110, 96) 
 
         //header
-        colors[ImGuiCol_TableHeaderBg]  = ImVec4(0.13333F, 0.156686F, 0.19215F, 1.0F); //col4 rgb(34, 40, 49))
-        colors[ImGuiCol_Header]         = ImVec4(0.22352F, 0.24313F, 0.27459F, 1.0F); //col3 rgb(57, 62, 70)
-        colors[ImGuiCol_HeaderHovered]  = ImVec4(0.47058F, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96)
-        colors[ImGuiCol_HeaderActive]   = ImVec4(0.47058F, 0.43137F, 0.37647F, 1.0F); //darken col2 rgb(120, 110, 96)
+        colors[ImGuiCol_TableHeaderBg]  = col4; //col4 rgb(34, 40, 49))
+        colors[ImGuiCol_Header]         = col3; //col3 rgb(57, 62, 70)
+        colors[ImGuiCol_HeaderHovered]  = col2; //darken col2 rgb(120, 110, 96)
+        colors[ImGuiCol_HeaderActive]   = col2; //darken col2 rgb(120, 110, 96)
         break;
-    
+    }
     case themes::light:
     {    //colors
         ImVec4 col1 = ImVec4(0.98431F, 0.98431F, 0.98431F, 1.0F); //col1 rgb(251, 251, 251) 

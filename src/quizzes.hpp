@@ -18,8 +18,6 @@ public:
     {
         std::string name;
 
-        int highScore;
-
         enum quizType{standart, multiple_choice};
         enum quizType type;
 
@@ -85,7 +83,7 @@ public:
     size_t question_index;
     size_t remain_question;
 
-    void draw_end_screen();
+    void draw_end_screen(float *width, ImFont *myFont);
 
     //random num generator
     int random_between(size_t min, size_t max);
