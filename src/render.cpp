@@ -142,6 +142,9 @@ void WindowClass::Draw_Quizlist() {
         if (ImGui::Selectable(quiz.data(), quiz_obj.selected_quiz == quiz.data())) {
             quiz_obj.selected_quiz = quiz.data();
         }
+        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            startQuizOpen = true;
+        }
         std::string uniqueName = "##quizContexMenu" + quiz;
         if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
             ImGui::OpenPopup(uniqueName.c_str());
@@ -556,7 +559,7 @@ void WindowClass::InitFont(){
     char fontPath[MAX_PATH];
     SHGetFolderPathA(nullptr, CSIDL_FONTS, nullptr, 0, fontPath);
     strcat_s(fontPath, "\\arial.ttf");  // Use Arial as the default font
-    
+
     static const ImWchar turkish_range[] = {
         0x0020, 0x00FF, // Latin-1 Supplement
         0x011E, 0x011F, // Ğ ğ
