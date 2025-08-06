@@ -19,7 +19,9 @@
 - :mag_right:**Classic Flashcard Mode** : Review and flip cards one by one.
 - :o:**Multiple Choice Mode** : Answer randomly generated multiple-choice questions.
 ## :camera:Screenshots
-
+![Task Manager UI 1](screenshot_1)
+![Task Manager UI 1](screenshot_2)
+![Task Manager UI 1](screenshot_3)
 ## :computer:**Tech Stack**
 - Language C++20
 - GUI Framework: [Dear ImGui](https://github.com/ocornut/imgui.git) with backend of glfw_opengl3
