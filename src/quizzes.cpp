@@ -8,6 +8,7 @@
 #include <random>
 #include <ctime>
 #include <chrono>
+#include <unordered_set>
 
 #include "quizzes.hpp"
 #include "render.hpp"
@@ -48,9 +49,12 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
         //general setup
         if(startQuiz_first_frame)
         {
-            std::cout<<"1\n";
             q = Quizzes[Qname];
-            quiz_size = q.flashcards.size(); 
+
+            quiz_size = q.flashcards.size();
+            actual_size = q.flashcards.size();
+            remain_question = q.flashcards.size();
+
             std::cout<<"size- "<<quiz_size<<" -size"<<std::endl;
             for(auto& card : q.flashcards) std::cout<<card.front_side<<std::endl;
 
@@ -60,8 +64,9 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
             else
                 myTimer.duration = 0.0F;
             startQuiz_first_frame = false;
-        }
 
+            std::cout<<"duracation- "<<myTimer.duration<<std::endl;
+        }
         //darw start screen
         ImVec2 buttonSize(width-(2*window_obj.main_padding), height- (5*window_obj.main_padding));
         ImGui::PushFont(giantFont);
@@ -70,19 +75,26 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
         if(ImGui::Button(("Start Quiz:\n" + Qname).c_str(), buttonSize))
         {
             state = QuizState::InProgress;
+
             if(!myTimer.running && myTimer.duration != 0)
             {
                 timer_start(&myTimer);
             }  
         }
-        
         ImGui::PopFont();
         break;
     }
     case QuizState::InProgress:
     {
-        
-        if(timer_update(&myTimer, width) == 2){state = QuizState::Ended; break;}
+        if(myTimer.running)
+        {
+            if(timer_update(&myTimer, width) == 2)
+            {
+                if(q.timer_on)
+                    myTimer.running = false;
+                state = QuizState::Ended;
+            }
+        }
         ImGui::SameLine();
         ImGui::SetCursorPosX(width -  2* window_obj.popup_padding);
         ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
@@ -91,20 +103,24 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
         
         if (ImGui::Button("X", ImVec2(28.0F, 28.0F)))
         {
-            ImGui::OpenPopup("##closeStandarQuizT");
+            ImGui::OpenPopup("##closeStandarQuiz");
         }
         ImGui::PopStyleColor(3);
 
-        if(ImGui::BeginPopup("##closeStandarQuizT"))
+        if(ImGui::BeginPopup("##closeStandarQuiz"))
         {
             ImGui::Text("Are you sure to exit quiz?");
-            if(ImGui::Button("Exit")){
+            if(ImGui::Button("Exit"))
+            {
                 if(q.timer_on)
                     myTimer.running = false;
+
                 state = QuizState::Ended;
                 ImGui::CloseCurrentPopup(); 
             }
+
             ImGui::SameLine();
+
             if(ImGui::Button("Cancel")){
                 ImGui::CloseCurrentPopup();
             }
@@ -116,15 +132,34 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
 
         if(next_question_on && quiz_size != 0)
         {   
-            if(q.timer_on) timer_start(&myTimer);
+            
+            if(q.timer_on)
+            {
+                myTimer.running = true;
+                timer_start(&myTimer);
+            } 
 
             question_index = random_between(0, quiz_size - 1);
+
+            if(q.type == quiz::quizType::multiple_choice && actual_size >= 4)
+                set_choices(Qname);
+
+
             next_question_on = false;
             std::cout <<"next question- size:"<<quiz_size<<" index: "<<question_index<<std::endl;
         }
 
+        if(q.type == quiz::quizType::multiple_choice && actual_size < 4)
+        {
+            myTimer.running = false;
+            ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::red));
+            ImGui::Text("Number of questions must be minimum four.");
+            ImGui::PopStyleColor(1);
+            return 0;
+        }
+
         ImGui::Text(("Score : " + std::to_string(current_score)).data());
-        ImGui::Text((std::to_string(quiz_size) + " questions remain").data());
+        ImGui::Text((std::to_string(remain_question - 1) + " questions remain").data());
         if(q.serial_true_resposne_open)
             ImGui::Text((std::to_string(serial_true_response ) + " streak!").data());
 
@@ -149,14 +184,17 @@ int quizzes::startQuiz(std::string Qname, float width, float height, ImFont* gia
         }
         break;
     }    
-    default:
-        break;
+    default: break;
     }
     return 0;
 }
 
 int quizzes::draw_multiple_choice_question(ImFont* giantFont, float* width, float* height)
 {   
+
+    static bool answered_true;
+    static int selected_choice;
+
     switch (q_state)
     {
     case not_answered:
@@ -166,18 +204,137 @@ int quizzes::draw_multiple_choice_question(ImFont* giantFont, float* width, floa
         ImGui::SetCursorPos(ImVec2(((*width) - textSize.x)/2 , ((*height) - textSize.y)/2));
         ImGui::Text("%s", q.flashcards.at(question_index).front_side.data());
         ImGui::PopFont();
+
+        ImGui::SetCursorPosY(*height - ImGui::CalcTextSize("AAA").y - (4*window_obj.popup_padding));
+        for(int i = 0; i < 4; i++)
+        {
+            if(ImGui::Button(choices[i].Card.back_side.c_str(), ImVec2((*width - (2 * window_obj.popup_padding)) / 4 , 80.0F))){
+                answered_true = choices[i].is_true;
+                selected_choice = i;
+                q_state = questionState::answered;
+                break;
+            }
+            ImGui::SameLine();
+        }
         break;
-        //choice buttons
     }
     case answered:
-    {
-        next_question_on = true;
+    {   
+        if(q.timer_on)
+            myTimer.running = false;
+
+        ImGui::PushFont(giantFont);
+        ImVec2 textSize = ImGui::CalcTextSize(q.flashcards[question_index].front_side.data());
+        ImGui::SetCursorPos(ImVec2(((*width) - textSize.x)/2 , ((*height) - textSize.y)/2));
+        ImGui::Text("%s", q.flashcards.at(question_index).front_side.data());
+        ImGui::PopFont();
+
+        if(answered_true)
+        {
+            ImGui::Text("True");
+            ImGui::SetCursorPosY(*height - ImGui::CalcTextSize("AAA").y - (4*window_obj.popup_padding));
+            for(int i = 0; i < 4; i++)
+            {
+                if(selected_choice == i){
+                    ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::green));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::green));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, window_obj.getColor(WindowClass::colors::green));
+                    ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
+                    ImGui::Button(choices[i].Card.back_side.c_str(),ImVec2((*width - (2 * window_obj.popup_padding)) / 4 , 80.0F));
+                    ImGui::PopStyleColor(4);
+                    ImGui::SameLine();
+                }
+                else{
+                    ImGui::Button(choices[i].Card.back_side.c_str(), ImVec2((*width - (2 * window_obj.popup_padding)) / 4 , 80.0F));
+                    ImGui::SameLine();
+                }
+            }
+        }
+        else{
+            ImGui::Text("False");
+            
+            ImGui::SetCursorPosY(*height - ImGui::CalcTextSize("AAA").y - (4*window_obj.popup_padding));
+            for(int i = 0; i < 4; i++)
+            {
+                if(choices[i].is_true){
+                    ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::green));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::green));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, window_obj.getColor(WindowClass::colors::green));
+                    ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
+                    ImGui::Button(choices[i].Card.back_side.c_str(), ImVec2((*width - (2 * window_obj.popup_padding)) / 4 , 80.0F));
+                    ImGui::PopStyleColor(4);
+                    ImGui::SameLine();
+                }
+                else if(i == selected_choice){
+                    ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::red));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, window_obj.getColor(WindowClass::colors::red));
+                    ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
+                    ImGui::Button(choices[i].Card.back_side.c_str(), ImVec2((*width - (2 * window_obj.popup_padding)) / 4 , 80.0F));
+                    ImGui::PopStyleColor(4);
+                    ImGui::SameLine();
+                }
+                else{
+                    ImGui::Button(choices[i].Card.back_side.c_str(), ImVec2((*width - (2 * window_obj.popup_padding)) / 4 , 80.0F));
+                    ImGui::SameLine();
+                }
+            } 
+        }
+        ImGui::SetCursorPos(ImVec2(window_obj.popup_padding ,*height - (5*ImGui::CalcTextSize("AAA").y) - (2*window_obj.popup_padding)));
+        if(ImGui::Button("Next Question"))
+        {   
+            if(answered_true)
+            {
+                update_question_arr(true);
+                update_score(true);
+
+            }else{
+                update_question_arr(false);
+                update_score(false);
+            }
+
+            q_state = questionState::not_answered;
+            next_question_on = true;
+            
+            for(auto card : q.flashcards){
+                std::cout<<"front "<<card.front_side<<" back "<<card.back_side<<std::endl;
+            }
+        }
         break;
     }
-    default:
-        break;
+    default: break;
     }
     return 0;
+}
+
+void quizzes::set_choices(std::string Qname)
+{
+    int true_choice_index = random_between(0,3);
+    choices[true_choice_index].is_true = true;
+    choices[true_choice_index].Card = q.flashcards.at(question_index);
+
+    std::unordered_set<int> question_index_from_flashcards;
+
+    while(question_index_from_flashcards.size() < 3)
+    {
+        int index = random_between(0, Quizzes[Qname].flashcards.size() - 1);
+        if(choices[true_choice_index].Card.back_side != Quizzes[Qname].flashcards.at(index).back_side)
+            question_index_from_flashcards.insert(index);
+    }
+    std::cout<<"in set choice 1\n";
+    std::vector<int> indices(question_index_from_flashcards.begin(), question_index_from_flashcards.end());
+
+    int e = 0;
+    for (int idx : indices)
+    {
+        if (e == true_choice_index) e++;
+
+        choices[e].is_true = false;
+        choices[e].Card = Quizzes[Qname].flashcards.at(idx);
+        std::cout << "choice: " << Quizzes[Qname].flashcards.at(idx).back_side << std::endl;
+        e++;
+    }
+    std::cout<<"in set choice 2\n";
 }
 int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* height)
 {
@@ -200,13 +357,13 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
     }
     case answered:
     {   
+        if(q.timer_on)
+            myTimer.running = false;
+
         ImGui::PushFont(giantFont);
         ImVec2 textSize = ImGui::CalcTextSize(("Answer is: " + q.flashcards[question_index].back_side).data());
         ImGui::SetCursorPos(ImVec2(((*width) - textSize.x)/2 , ((*height) - textSize.y)/2));
         ImGui::Text(("Answer is: " + q.flashcards[question_index].back_side).data());
-
-        if(q.timer_on)
-            myTimer.running = false;
 
         ImGui::SetCursorPos(ImVec2(window_obj.popup_padding, (*height) - 4 * window_obj.popup_padding));
         ImGui::PushStyleColor(ImGuiCol_Text, window_obj.getColor(WindowClass::colors::black));
@@ -214,6 +371,9 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::lightGreen));
         if(ImGui::Button("True", ImVec2((*width)/2 - 3* window_obj.popup_padding,  0.0F))) 
         {
+            update_question_arr(true);
+            update_score(true);
+            /*
             if(q.serial_true_resposne_open)
             {
                 if(serial_true_response != 0){
@@ -232,7 +392,7 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
             q.flashcards.at(question_index).back_side.erase();
             q.flashcards.erase(q.flashcards.begin() + question_index);
             quiz_size--;
-
+            */
             //------------
             for(auto& card : q.flashcards)
                 std::cout<<card.front_side<<" "<<card.back_side<<std::endl;
@@ -240,9 +400,6 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
 
             q_state = questionState::not_answered;
             next_question_on = true; 
-
-            if(q.timer_on)
-                myTimer.running = true;
 
             std::cout<<"end of true button\n";
         }
@@ -254,12 +411,16 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
         ImGui::PushStyleColor(ImGuiCol_Button, window_obj.getColor(WindowClass::colors::red));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, window_obj.getColor(WindowClass::colors::darkRed));
         if(ImGui::Button("False", ImVec2((*width)/2 - 3* window_obj.popup_padding,  0.0F)))
-        {
+        {   
+            update_question_arr(false);
+            update_score(false);
+            /*
             if(q.serial_true_resposne_open) //streak 
                 serial_true_response = 0;
             if(q.punsih_on)
                 current_score -= q.punishmentToScore;
-
+            */
+            /*
             if(q.falseAnswerRepeatTime != 0)
             {
                 if(false_answers.contains(q.flashcards.at(question_index).front_side))
@@ -284,13 +445,10 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
                 q.flashcards.at(question_index).back_side.erase();
                 q.flashcards.erase(q.flashcards.begin() + question_index);
                 quiz_size--;
-            }
+            }*/
 
             q_state = questionState::not_answered;
             next_question_on = true;
-
-            if(q.timer_on)
-                myTimer.running = true;
 
             std::cout<<"end of false button\n";
         }
@@ -305,6 +463,93 @@ int quizzes::draw_standart_question(ImFont* giantFont, float* width, float* heig
     return 0;
 }
 
+
+void quizzes::update_question_arr(bool conditation)
+{   
+    switch (conditation)
+    {
+    case true:
+    {
+    q.flashcards.at(question_index).front_side.erase();
+    q.flashcards.at(question_index).back_side.erase();
+    q.flashcards.erase(q.flashcards.begin() + question_index);
+    quiz_size--;
+    remain_question--;
+    break;
+    }
+
+    case false:
+    {
+    if(q.falseAnswerRepeatTime != 0)
+    {
+        if(false_answers.contains(q.flashcards.at(question_index).front_side))
+        {
+            //exsist  
+            false_answers[q.flashcards.at(question_index).front_side]++;
+            remain_question--;
+        }else
+        {
+            //not exsist
+            false_answers[q.flashcards.at(question_index).front_side] = 0;
+            remain_question += q.falseAnswerRepeatTime - 1;
+        }
+        //repeat enought time
+        if(false_answers[q.flashcards.at(question_index).front_side] == q.falseAnswerRepeatTime)
+        {
+            q.flashcards.at(question_index).front_side.erase();
+            q.flashcards.at(question_index).back_side.erase();
+            q.flashcards.erase(q.flashcards.begin() + question_index);
+            quiz_size--;
+            remain_question--;
+        }
+    }else{
+        q.flashcards.at(question_index).front_side.erase();
+        q.flashcards.at(question_index).back_side.erase();
+        q.flashcards.erase(q.flashcards.begin() + question_index);
+        quiz_size--;
+        remain_question--;
+    }
+    break; 
+    }
+    
+    default:
+        break;
+    }   
+}
+
+void quizzes::update_score(bool conditation)
+{   
+    switch (conditation)
+    {
+    case true:
+    {
+        if(q.serial_true_resposne_open)
+        {
+            if(serial_true_response != 0){
+                next_score_increase += (next_score_increase * (q.serial_true_response_coefficient/100));
+                std::cout<<"next question gives score "<<next_score_increase<<"\n";
+                current_score += (int)next_score_increase;
+            }else{
+                current_score += 100; 
+            }
+            serial_true_response++;      
+        } 
+        else
+            current_score += 100;
+        break;
+    }
+    case false:
+    {
+        if(q.serial_true_resposne_open) //streak 
+                serial_true_response = 0;
+        if(q.punsih_on)
+            current_score -= q.punishmentToScore;
+        break;
+    }
+    default:
+        break;
+    }
+}
 void quizzes::draw_end_screen()
 {
     ImGui::Text("quiz is done");
@@ -328,6 +573,7 @@ int quizzes::timer_update(timerBar* timer, float width)
 
     if(progress >= 1.0F){
         progress = 1.0f;
+        std::cout<<elapse.count()<<" elapsed\n";
         return 2;
     }
 
@@ -341,7 +587,7 @@ int quizzes::timer_update(timerBar* timer, float width)
 
 int quizzes::random_between(size_t min, size_t max) 
 {
-    std::cout << min << " > " << max << ")\n";
+    //std::cout << min << " > " << max << ")\n";
         
     static std::mt19937 gen(std::random_device{}());
     std::uniform_int_distribution<> distr(static_cast<int>(min), static_cast<int>(max));

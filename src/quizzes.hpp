@@ -57,6 +57,7 @@ public:
 
     quizzes::quiz q;
     size_t quiz_size;
+    size_t actual_size;
     std::map<std::string, int> false_answers;
 
     int current_score = 0;
@@ -64,12 +65,25 @@ public:
     float next_score_increase = 100;
 
     //in progcess
-    int draw_multiple_choice_question(ImFont* giantFont, float* width, float* height);
-    int draw_standart_question(ImFont* giantFont, float* width, float* height);
     enum questionState {not_answered ,answered};
     questionState q_state = not_answered;
+
+    int draw_standart_question(ImFont* giantFont, float* width, float* height);
+
+    int draw_multiple_choice_question(ImFont* giantFont, float* width, float* height);
+
+    typedef struct choice{bool is_true; flashcard::card Card; }choice;
+    choice choices[4];
+    void set_choices(std::string Qname);
+
+    int last_question_index;
+
+    void update_question_arr(bool conditation);
+    void update_score(bool conditation);
+
     bool next_question_on = true;
     size_t question_index;
+    size_t remain_question;
 
     void draw_end_screen();
 
