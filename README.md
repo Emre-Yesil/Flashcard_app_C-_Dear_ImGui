@@ -8,7 +8,8 @@
   - :x:**Wrong Answer Punishment**
       - Lose points and streak when answering incorrectly, optional and adjustable.
   - :hourglass:**Timer**
-    - Set a countdown for each question or question, or turn it off entirely.
+    - Set a countdown for each question
+or turn it off entirely.
   - :fire:**Streak System**
       - Track consecutive correct answers to boost your score, or disable it if you prefer.
   - :repeat_one:**Repeat Incorrect Answers**
