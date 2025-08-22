@@ -32,6 +32,7 @@ or turn it off entirely.
 ## :hammer:**Installation**     
 ```cmd
 git clone git@github.com:Emre-Yesil/Flashcard_app_C-_Dear_ImGui.git
+cd Flashcard_app_C-_Dear_ImGui
 cd external
 git clone https://github.com/Microsoft/vcpkg.git
 .\vcpkg\bootstrap-vcpkg.bat # windows
