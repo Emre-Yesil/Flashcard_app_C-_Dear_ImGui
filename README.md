@@ -21,7 +21,7 @@ or turn it off entirely.
 - :o:**Multiple Choice Mode** : Answer randomly generated multiple-choice questions.
 ## :camera:Screenshots
 ![Task Manager UI 1](screenshot_1.png)
-![Task Manager UI 1](screenshot_2.png)
+![Task Manager UI 1](screenshot2.png)
 ![Task Manager UI 1](screenshot_3.png)
 ## :computer:**Tech Stack**
 - Language C++20
